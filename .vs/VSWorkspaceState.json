@@ -2,8 +2,7 @@
   "ExpandedNodes": [
     "",
     "\\lib",
-    "\\lib\\screens",
-    "\\lib\\services"
+    "\\lib\\screens"
   ],
   "SelectedNode": "\\lib\\main.dart",
   "PreviewInSolutionExplorer": false

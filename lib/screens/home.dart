@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-// Keep colors as requested
 const Color _primaryColor = Color(0xFFBFA18E);
 const Color _textColor = Color(0xFF1D2939);
-const Color _backgroundColor = Color(0xFFF2F4F7); // Light gray background for the education app
+const Color _backgroundColor = Color(0xFFF2F4F7);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    // Mock data (kept from previous code)
     const notices = <_NoticeData>[
       _NoticeData(
         title: 'Beginning-of-year parent meeting',
@@ -29,29 +27,26 @@ class _HomeScreenState extends State<HomeScreen> {
       )
     ];
 
-    // Menu Grid data (vnEdu specific)
     final List<Map<String, dynamic>> menuItems = [
-      {'icon': Icons.assignment_turned_in, 'label': 'Academic results'},
-      {'icon': Icons.calendar_month, 'label': 'Timetable'},
-      {'icon': Icons.verified_user, 'label': 'Attendance'},
-      {'icon': Icons.edit_document, 'label': 'Leave request'},
-      {'icon': Icons.message, 'label': 'Notes'},
-      {'icon': Icons.restaurant_menu, 'label': 'Meal plan'},
-      {'icon': Icons.payments, 'label': 'Tuition'},
-      {'icon': Icons.image, 'label': 'Photo album'},
+      {'icon': Icons.assignment_turned_in, 'label': 'Academic results', 'route': '/academic_results'},
+      {'icon': Icons.calendar_month, 'label': 'Timetable', 'route': '/timetable'},
+      {'icon': Icons.verified_user, 'label': 'Attendance', 'route': '/attendance'},
+      {'icon': Icons.edit_document, 'label': 'Leave request', 'route': '/leave_request'},
+      {'icon': Icons.message, 'label': 'Notes', 'route': '/notes'},
+      {'icon': Icons.restaurant_menu, 'label': 'Meal plan', 'route': '/meal_plan'},
+      {'icon': Icons.payments, 'label': 'Tuition', 'route': '/tuition'},
+      {'icon': Icons.image, 'label': 'Photo album', 'route': '/photo_album'},
     ];
 
     return Scaffold(
       backgroundColor: _backgroundColor,
-      // --- VNEDU-STYLE HEADER (Colored background + info) ---
       appBar: AppBar(
         backgroundColor: _primaryColor,
         elevation: 0,
-        toolbarHeight: 0, // Hide default toolbar to customize header
+        toolbarHeight: 0,
       ),
       body: Column(
         children: [
-          // Header with student information
           Container(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
             decoration: const BoxDecoration(
@@ -71,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const CircleAvatar(
                     radius: 26,
                     backgroundColor: Colors.white,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'), // Placeholder image
+                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -91,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
@@ -110,7 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Main content (scrollable)
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -119,7 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const SizedBox(height: 20),
 
-                  // --- FEATURE GRID MENU (vnEdu specific) ---
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -127,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -147,6 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         return _MenuIcon(
                           icon: menuItems[index]['icon'],
                           label: menuItems[index]['label'],
+                          onTap: () {
+                            if (menuItems[index]['route'] != null) {
+                              Navigator.pushNamed(context, menuItems[index]['route']);
+                            }
+                          },
                         );
                       },
                     ),
@@ -154,7 +152,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 24),
 
-                  // --- SECTION: LATEST ANNOUNCEMENTS ---
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -166,7 +163,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
 
-                  // Announcement list (reuse previous logic)
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -194,45 +190,48 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- Widget: Menu item in the grid ---
 class _MenuIcon extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
 
-  const _MenuIcon({required this.icon, required this.label});
+  const _MenuIcon({required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          height: 48,
-          width: 48,
-          decoration: BoxDecoration(
-            color: _primaryColor.withOpacity(0.1), // Subtle icon background
-            borderRadius: BorderRadius.circular(16),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: 48,
+            width: 48,
+            decoration: BoxDecoration(
+              color: _primaryColor.withValues(alpha: 0.1), // Subtle icon background
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: _primaryColor, size: 26),
           ),
-          child: Icon(icon, color: _primaryColor, size: 26),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 12,
-            color: _textColor,
-            fontWeight: FontWeight.w500,
-          ),
-        )
-      ],
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              color: _textColor,
+              fontWeight: FontWeight.w500,
+            ),
+          )
+        ],
+      ),
     );
   }
 }
 
-// --- Widget: Announcement (keeps previous logic but streamlined style) ---
 class _NoticeTile extends StatelessWidget {
   const _NoticeTile({required this.data});
 
@@ -240,68 +239,80 @@ class _NoticeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/news_detail',
+          arguments: {
+            'title': data.title,
+            'description': data.description,
+            'time': data.time,
+          },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.notifications_active, color: Colors.orange, size: 20),
             ),
-            child: const Icon(Icons.notifications_active, color: Colors.orange, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        data.title,
-                        style: const TextStyle(
-                          color: _textColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          data.title,
+                          style: const TextStyle(
+                            color: _textColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Text(
-                      data.time,
-                      style: TextStyle(color: Colors.grey[400], fontSize: 11),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  data.description,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                      Text(
+                        data.time,
+                        style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    data.description,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-// Data model
 class _NoticeData {
   const _NoticeData({required this.title, required this.description, required this.time});
   final String title;

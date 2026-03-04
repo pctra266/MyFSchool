@@ -45,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundColor: _primaryColor.withOpacity(0.15),
+                      backgroundColor: _primaryColor.withValues(alpha: 0.15),
                       child: const Icon(Icons.person_outline, size: 40, color: _primaryColor),
                     ),
                     const SizedBox(height: 12),
@@ -253,7 +253,7 @@ class _ToggleRow extends StatelessWidget {
         ),
         Switch(
           value: value,
-          activeColor: _primaryColor,
+          activeThumbColor: _primaryColor,
           onChanged: onChanged,
         ),
       ],
@@ -261,31 +261,7 @@ class _ToggleRow extends StatelessWidget {
   }
 }
 
-class _InfoBadge extends StatelessWidget {
-  const _InfoBadge({required this.title, required this.value});
 
-  final String title;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title.toUpperCase(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: _textColor,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _LinkRow extends StatelessWidget {
   const _LinkRow({required this.title, required this.value});

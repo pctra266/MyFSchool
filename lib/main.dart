@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'screens/login.dart';
-import 'screens/signup.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
-import 'screens/verify_email.dart';
+import 'screens/academic_results.dart';
+import 'screens/timetable.dart';
+import 'screens/attendance.dart';
+import 'screens/leave_request.dart';
+import 'screens/notes.dart';
+import 'screens/meal_plan.dart';
+import 'screens/tuition.dart';
+import 'screens/photo_album.dart';
+import 'screens/notification.dart';
+import 'screens/news_detail.dart';
+import 'screens/payment_confirmation.dart';
+import 'screens/reset_password.dart';
 
 const Color kPrimaryColor = Color(0xFFBFA18E);
 const Color kSurfaceColor = Color(0xFFF4ECE6);
@@ -21,7 +31,6 @@ class MyApp extends StatelessWidget {
       seedColor: kPrimaryColor,
       brightness: Brightness.light,
       surface: kSurfaceColor,
-      background: kSurfaceColor,
     );
 
     return MaterialApp(
@@ -58,12 +67,12 @@ class MyApp extends StatelessWidget {
         ),
         chipTheme: ChipThemeData(
           backgroundColor: Colors.white,
-          selectedColor: kPrimaryColor.withOpacity(0.12),
+          selectedColor: kPrimaryColor.withValues(alpha: 0.12),
           labelStyle: const TextStyle(fontWeight: FontWeight.w600),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: kPrimaryColor.withOpacity(0.2)),
+            side: BorderSide(color: kPrimaryColor.withValues(alpha: 0.2)),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
@@ -72,7 +81,7 @@ class MyApp extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
-            borderSide: BorderSide(color: kPrimaryColor.withOpacity(0.3)),
+            borderSide: BorderSide(color: kPrimaryColor.withValues(alpha: 0.3)),
           ),
           focusedBorder: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(18)),
@@ -82,8 +91,17 @@ class MyApp extends StatelessWidget {
       ),
       home: const SignInScreen(),
       routes: {
-        '/signup': (_) => const SignUpScreen(),
-        '/verify-email': (_) => const VerifyEmailScreen(),
+        '/academic_results': (context) => const AcademicResultsScreen(),
+        '/timetable': (context) => const TimetableScreen(),
+        '/attendance': (context) => const AttendanceScreen(),
+        '/leave_request': (context) => const LeaveRequestScreen(),
+        '/notes': (context) => const NotesScreen(),
+        '/meal_plan': (context) => const MealPlanScreen(),
+        '/tuition': (context) => const TuitionScreen(),
+        '/photo_album': (context) => const PhotoAlbumScreen(),
+        '/payment_confirmation': (context) => const PaymentConfirmationScreen(),
+        '/news_detail': (context) => NewsDetailScreen(newsItem: ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>),
+        '/reset_password': (context) => const ResetPasswordScreen(),
       },
     );
   }
@@ -111,7 +129,7 @@ class _MainScreenState extends State<MainScreen> {
       body: _screens[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         backgroundColor: Colors.white,
-        indicatorColor: kPrimaryColor.withOpacity(0.2),
+        indicatorColor: kPrimaryColor.withValues(alpha: 0.2),
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) => setState(() => _selectedIndex = index),
         destinations: const [
@@ -136,74 +154,3 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-class NotificationScreen extends StatelessWidget {
-  const NotificationScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final notifications = List.generate(
-      3,
-      (index) => {
-        'title': 'Featured notification #${index + 1}',
-        'time': '20:${index}5 today',
-        'description': 'A concise reminder that keeps your daily milestones on track.',
-      },
-    );
-
-    return Scaffold(
-      backgroundColor: kSurfaceColor,
-      appBar: AppBar(
-        title: const Text('Notification center'),
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(20),
-        itemBuilder: (context, index) {
-          final item = notifications[index];
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['title']!,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  item['description']!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(Icons.schedule, size: 16, color: Colors.grey[600]),
-                    const SizedBox(width: 6),
-                    Text(item['time']!, style: TextStyle(color: Colors.grey[600])),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Mark as read'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
-        itemCount: notifications.length,
-      ),
-    );
-  }
-}

@@ -3,44 +3,12 @@
   "WorkspaceRootPath": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\home.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\screens\\home.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\profile.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\screens\\profile.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\main.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\main.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\detail.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\screens\\detail.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\signup.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\screens\\signup.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\pubspec.yaml||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:pubspec.yaml||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\login.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\screens\\login.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\verify_email.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\screens\\verify_email.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\services\\auth_repository.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\services\\auth_repository.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\home.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\screens\\home.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -54,130 +22,30 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "detail.dart",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\detail.dart",
-              "RelativeDocumentMoniker": "lib\\screens\\detail.dart",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\detail.dart",
-              "RelativeToolTip": "lib\\screens\\detail.dart",
-              "ViewState": "AgIAAPgAAAAAAAAAAAAnwAIBAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T04:28:11.67Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "home.dart",
               "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\home.dart",
               "RelativeDocumentMoniker": "lib\\screens\\home.dart",
               "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\home.dart",
               "RelativeToolTip": "lib\\screens\\home.dart",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAAABoAAAAGAAAAAAAAAA==",
+              "ViewState": "AgIAAGUAAAAAAAAAAAAmwHUAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T04:27:06.993Z",
+              "WhenOpened": "2026-02-03T14:17:52.279Z",
+              "IsPinned": true,
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "README.md",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\README.md",
-              "RelativeDocumentMoniker": "README.md",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\README.md",
-              "RelativeToolTip": "README.md",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2026-01-30T04:23:03.853Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "pubspec.yaml",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\pubspec.yaml",
-              "RelativeDocumentMoniker": "pubspec.yaml",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\pubspec.yaml",
-              "RelativeToolTip": "pubspec.yaml",
-              "ViewState": "AgIAADQAAAAAAAAAAAAiwDwAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
-              "WhenOpened": "2026-01-30T04:12:38.418Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "profile.dart",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\profile.dart",
-              "RelativeDocumentMoniker": "lib\\screens\\profile.dart",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\profile.dart",
-              "RelativeToolTip": "lib\\screens\\profile.dart",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T02:18:51.41Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "login.dart",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\login.dart",
-              "RelativeDocumentMoniker": "lib\\screens\\login.dart",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\login.dart",
-              "RelativeToolTip": "lib\\screens\\login.dart",
-              "ViewState": "AgIAAFYAAAAAAAAAAAAkwGQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T02:14:54.321Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "main.dart",
               "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\main.dart",
               "RelativeDocumentMoniker": "lib\\main.dart",
               "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\main.dart",
               "RelativeToolTip": "lib\\main.dart",
-              "ViewState": "AgIAAIEAAAAAAAAAAAAAAJcAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAmwB4AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T02:01:59.837Z",
+              "WhenOpened": "2026-02-03T15:09:21.686Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "verify_email.dart",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\verify_email.dart",
-              "RelativeDocumentMoniker": "lib\\screens\\verify_email.dart",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\verify_email.dart",
-              "RelativeToolTip": "lib\\screens\\verify_email.dart",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAABGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T02:01:41.332Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "signup.dart",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\signup.dart",
-              "RelativeDocumentMoniker": "lib\\screens\\signup.dart",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\screens\\signup.dart",
-              "RelativeToolTip": "lib\\screens\\signup.dart",
-              "ViewState": "AgIAAO8AAAAAAAAAAAAIwAIBAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T02:01:13.933Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "auth_repository.dart",
-              "DocumentMoniker": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\services\\auth_repository.dart",
-              "RelativeDocumentMoniker": "lib\\services\\auth_repository.dart",
-              "ToolTip": "D:\\@DATA_CENTER\\01 Projects\\3_PRM3636\\myfschools\\lib\\services\\auth_repository.dart",
-              "RelativeToolTip": "lib\\services\\auth_repository.dart",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-30T02:00:30.498Z"
             }
           ]
         }
