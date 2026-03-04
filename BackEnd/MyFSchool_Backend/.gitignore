@@ -1,0 +1,27 @@
+# .NET Core
+bin/
+obj/
+*.exe
+*.pdb
+*.dll
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Environment Variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# App Settings (usually ignored to prevent leaking secrets, but sometimes included)
+# appsettings.Development.json
+# appsettings.json
