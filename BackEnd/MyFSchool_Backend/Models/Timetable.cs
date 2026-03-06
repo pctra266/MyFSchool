@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyFSchool_Backend.Models;
+[Table("Timetable")]
 
 public class Timetable
 {

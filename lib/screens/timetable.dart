@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 const Color _primaryColor = Color(0xFFBFA18E);
 const Color _backgroundColor = Color(0xFFF2F4F7);
@@ -16,36 +17,76 @@ class _TimetableScreenState extends State<TimetableScreen> {
   int _selectedDayIndex = 0;
   final List<String> _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  final List<Map<String, String>> _classes = const [
-    {
-      'startTime': '07:00',
-      'endTime': '08:30',
-      'subject': 'Mathematics',
-      'room': 'Room 101',
-      'teacher': 'Mr. Anderson',
-    },
-    {
-      'startTime': '08:45',
-      'endTime': '10:15',
-      'subject': 'Physics',
-      'room': 'Lab 203',
-      'teacher': 'Ms. Curie',
-    },
-    {
-      'startTime': '10:30',
-      'endTime': '12:00',
-      'subject': 'Literature',
-      'room': 'Room 105',
-      'teacher': 'Mr. Shakespeare',
-    },
-    {
-      'startTime': '13:30',
-      'endTime': '15:00',
-      'subject': 'Physical Education',
-      'room': 'Ground',
-      'teacher': 'Mr. Bolt',
-    },
-  ];
+  bool _isLoading = true;
+  String _errorMessage = '';
+  List<dynamic> _allTimetables = [];
+  List<Map<String, String>> _classes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTimetable();
+  }
+
+  Future<void> _fetchTimetable() async {
+    try {
+      final response = await ApiService().getTimetable();
+      if (mounted) {
+        if (response['success']) {
+          setState(() {
+            _allTimetables = response['data'] ?? [];
+            _filterClassesForDay();
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _errorMessage = response['message'] ?? 'Failed to load timetable';
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'An error occurred: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _filterClassesForDay() {
+    final selectedDayName = _days[_selectedDayIndex];
+    String fullDayName = '';
+    switch (selectedDayName) {
+      case 'Mon': fullDayName = 'Monday'; break;
+      case 'Tue': fullDayName = 'Tuesday'; break;
+      case 'Wed': fullDayName = 'Wednesday'; break;
+      case 'Thu': fullDayName = 'Thursday'; break;
+      case 'Fri': fullDayName = 'Friday'; break;
+      case 'Sat': fullDayName = 'Saturday'; break;
+    }
+
+    final filtered = _allTimetables.where((t) => t['dayOfWeek'] == fullDayName).toList();
+
+    _classes = filtered.map<Map<String, String>>((t) {
+      String formatTime(String timeStr) {
+        if (timeStr.length >= 5) {
+          return timeStr.substring(0, 5);
+        }
+        return timeStr;
+      }
+      return {
+        'startTime': formatTime(t['startTime']?.toString() ?? ''),
+        'endTime': formatTime(t['endTime']?.toString() ?? ''),
+        'subject': t['subjectName']?.toString() ?? 'N/A',
+        'room': t['room']?.toString() ?? 'N/A',
+        'teacher': t['teacherName']?.toString() ?? 'TBD',
+      };
+    }).toList();
+
+    _classes.sort((a, b) => a['startTime']!.compareTo(b['startTime']!));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,18 +103,27 @@ class _TimetableScreenState extends State<TimetableScreen> {
         children: [
           _buildDaySelector(),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              itemCount: _classes.length,
-              itemBuilder: (context, index) {
-                final cls = _classes[index];
-                final isLast = index == _classes.length - 1;
-                return _TimelineItem(
-                  data: cls,
-                  isLast: isLast,
-                );
-              },
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator(color: _primaryColor))
+                : _errorMessage.isNotEmpty
+                    ? Center(child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+                      ))
+                    : _classes.isEmpty
+                        ? const Center(child: Text('No classes for this day', style: TextStyle(fontSize: 16, color: Colors.grey)))
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                            itemCount: _classes.length,
+                            itemBuilder: (context, index) {
+                              final cls = _classes[index];
+                              final isLast = index == _classes.length - 1;
+                              return _TimelineItem(
+                                data: cls,
+                                isLast: isLast,
+                              );
+                            },
+                          ),
           ),
         ],
       ),
@@ -89,7 +139,12 @@ class _TimetableScreenState extends State<TimetableScreen> {
         children: List.generate(_days.length, (index) {
           final isSelected = index == _selectedDayIndex;
           return GestureDetector(
-            onTap: () => setState(() => _selectedDayIndex = index),
+            onTap: () {
+              setState(() {
+                _selectedDayIndex = index;
+                _filterClassesForDay();
+              });
+            },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,

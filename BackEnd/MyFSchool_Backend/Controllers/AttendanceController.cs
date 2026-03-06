@@ -25,7 +25,7 @@ public class AttendanceController : ControllerBase
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdStr, out var studentId)) return Unauthorized();
 
-        var attendances = await _context.Attendances
+        var attendances = await _context.Attendance
             .Where(a => a.StudentId == studentId)
             .ToListAsync();
 
@@ -43,7 +43,7 @@ public class AttendanceController : ControllerBase
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdStr, out var studentId)) return Unauthorized();
 
-        var attendances = await _context.Attendances
+        var attendances = await _context.Attendance
             .Where(a => a.StudentId == studentId && a.AttendanceDate.Year == year && a.AttendanceDate.Month == month)
             .OrderBy(a => a.AttendanceDate)
             .Select(a => new

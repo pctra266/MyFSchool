@@ -15,8 +15,8 @@ public class MyFSchoolDbContext : DbContext
     public DbSet<StudentClass> StudentClasses { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<AcademicResult> AcademicResults { get; set; }
-    public DbSet<Timetable> Timetables { get; set; }
-    public DbSet<Attendance> Attendances { get; set; }
+    public DbSet<Timetable> Timetable { get; set; }
+    public DbSet<Attendance> Attendance { get; set; }
     public DbSet<LeaveRequest> LeaveRequests { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<News> News { get; set; }

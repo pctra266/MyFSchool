@@ -29,7 +29,7 @@ public class TimetableController : ControllerBase
             .Select(sc => sc.ClassId)
             .ToListAsync();
 
-        var timetables = await _context.Timetables
+        var timetables = await _context.Timetable
             .Include(t => t.Subject)
             .Include(t => t.Teacher)
             .Where(t => classIds.Contains(t.ClassId))
