@@ -41,4 +41,5 @@ public class User
     public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public ICollection<StudentClass> StudentClasses { get; set; } = new List<StudentClass>();
+    public ICollection<Note> Notes { get; set; } = new List<Note>();
 }

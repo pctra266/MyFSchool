@@ -75,3 +75,10 @@ INSERT INTO News (Title, Description, Category, ImageUrl, CreatedAt) VALUES
 INSERT INTO NewsAttachments (NewsId, FileName, FileSize, FileUrl) VALUES
 (1, N'Meeting_Agenda.pdf', N'2.5 MB', '/files/meeting_agenda.pdf'),
 (1, N'Parent_Consent_Form.docx', N'1.2 MB', '/files/parent_consent_form.docx');
+
+-- 12. Notes
+-- Giáo viên Mathematics (Id 3) và Physics (Id 4) ghi chú cho Alice (Id 1)
+INSERT INTO Notes (StudentId, TeacherId, Content, Type, CreatedAt) VALUES
+(1, 3, N'Alice has been performing exceptionally well in Advanced Algebra. Keep it up!', 'Academic', DATEADD(day, -2, GETDATE())),
+(1, 4, N'Needs to pay more attention during laboratory sessions. Slightly distracted.', 'Behavior', DATEADD(day, -5, GETDATE())),
+(1, 3, N'Remember to bring the permission slip for the field trip next week. Also, check the math homework on page 42.', 'Personal', GETDATE());
