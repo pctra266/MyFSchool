@@ -82,3 +82,11 @@ INSERT INTO Notes (StudentId, TeacherId, Content, Type, CreatedAt) VALUES
 (1, 3, N'Alice has been performing exceptionally well in Advanced Algebra. Keep it up!', 'Academic', DATEADD(day, -2, GETDATE())),
 (1, 4, N'Needs to pay more attention during laboratory sessions. Slightly distracted.', 'Behavior', DATEADD(day, -5, GETDATE())),
 (1, 3, N'Remember to bring the permission slip for the field trip next week. Also, check the math homework on page 42.', 'Personal', GETDATE());
+
+-- 13. Meal Plans
+INSERT INTO MealPlans (DayOfWeek, MainDish, SideDish, Soup) VALUES
+('Monday', N'Grilled Chicken & Rice', N'Steamed Vegetables', N'Pumpkin Soup'),
+('Tuesday', N'Spaghetti Bolognese', N'Garlic Bread', N'Minestrone'),
+('Wednesday', N'Fish & Chips', N'Coleslaw', N'Corn Soup'),
+('Thursday', N'Beef Stew', N'Mashed Potatoes', N'Mushroom Soup'),
+('Friday', N'Pizza Margherita', N'Caesar Salad', N'Tomato Soup');

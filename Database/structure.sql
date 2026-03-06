@@ -123,3 +123,13 @@ CREATE TABLE Notes (
     FOREIGN KEY (StudentId) REFERENCES Users(Id),
     FOREIGN KEY (TeacherId) REFERENCES Users(Id)
 );
+
+-- 13. Bảng MealPlans
+CREATE TABLE MealPlans (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    DayOfWeek NVARCHAR(20),
+    MainDish NVARCHAR(255),
+    SideDish NVARCHAR(255),
+    Soup NVARCHAR(255),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);

@@ -22,6 +22,7 @@ public class MyFSchoolDbContext : DbContext
     public DbSet<News> News { get; set; }
     public DbSet<NewsAttachment> NewsAttachments { get; set; }
     public DbSet<Note> Notes { get; set; }
+    public DbSet<MealPlan> MealPlans { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
