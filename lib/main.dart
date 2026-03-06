@@ -10,7 +10,7 @@ import 'screens/leave_request.dart';
 import 'screens/notes.dart';
 import 'screens/meal_plan.dart';
 import 'screens/tuition.dart';
-import 'screens/photo_album.dart';
+import 'screens/health_records.dart';
 import 'screens/notification.dart';
 import 'screens/news_detail.dart';
 import 'screens/payment_confirmation.dart';
@@ -108,7 +108,7 @@ class MyApp extends StatelessWidget {
         '/notes': (context) => const NotesScreen(),
         '/meal_plan': (context) => const MealPlanScreen(),
         '/tuition': (context) => const TuitionScreen(),
-        '/photo_album': (context) => const PhotoAlbumScreen(),
+        '/health_records': (context) => const HealthRecordsScreen(),
         '/payment_confirmation': (context) => const PaymentConfirmationScreen(),
         '/news_detail': (context) => NewsDetailScreen(newsItem: ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>),
         '/reset_password': (context) => const ResetPasswordScreen(),

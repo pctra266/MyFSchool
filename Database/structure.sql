@@ -133,3 +133,17 @@ CREATE TABLE MealPlans (
     Soup NVARCHAR(255),
     CreatedAt DATETIME DEFAULT GETDATE()
 );
+
+-- 14. Bảng HealthRecords
+CREATE TABLE HealthRecords (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    StudentId INT,
+    RecordDate DATE,
+    Height DECIMAL(5, 2),
+    Weight DECIMAL(5, 2),
+    BMI DECIMAL(4, 2),
+    BloodType NVARCHAR(10),
+    Allergies NVARCHAR(MAX),
+    MedicalNotes NVARCHAR(MAX),
+    FOREIGN KEY (StudentId) REFERENCES Users(Id)
+);

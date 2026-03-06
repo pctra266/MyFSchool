@@ -90,3 +90,8 @@ INSERT INTO MealPlans (DayOfWeek, MainDish, SideDish, Soup) VALUES
 ('Wednesday', N'Fish & Chips', N'Coleslaw', N'Corn Soup'),
 ('Thursday', N'Beef Stew', N'Mashed Potatoes', N'Mushroom Soup'),
 ('Friday', N'Pizza Margherita', N'Caesar Salad', N'Tomato Soup');
+
+-- 14. Health Records
+INSERT INTO HealthRecords (StudentId, RecordDate, Height, Weight, BMI, BloodType, Allergies, MedicalNotes) VALUES
+(1, '2023-08-01', 160.5, 50.2, 19.48, 'O+', N'None', N'Healthy, no specific medical condition recorded.'),
+(1, '2024-01-15', 162.0, 52.0, 19.81, 'O+', N'None', N'Regular checkup. Good health.');
