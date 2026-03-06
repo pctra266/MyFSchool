@@ -257,4 +257,59 @@ class ApiService {
       return {'success': false, 'message': 'Network error ($e). Please try again later.'};
     }
   }
+  Future<Map<String, dynamic>> getNews() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/News'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'message': 'Failed to load news'};
+      }
+    } catch (e) {
+      print('Network error fetching news: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> getNewsDetail(int id) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/News/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else if (response.statusCode == 404) {
+        return {'success': false, 'message': 'News not found'};
+      } else {
+        return {'success': false, 'message': 'Failed to load news detail'};
+      }
+    } catch (e) {
+      print('Network error fetching news detail: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
 }

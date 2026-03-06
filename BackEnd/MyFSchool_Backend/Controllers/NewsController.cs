@@ -39,8 +39,26 @@ public class NewsController : ControllerBase
     public async Task<IActionResult> GetNewsDetails(int id)
     {
         var newsItem = await _context.News
-            .Include(n => n.Attachments)
-            .FirstOrDefaultAsync(n => n.Id == id);
+            .Where(n => n.Id == id)
+            .Select(n => new
+            {
+                n.Id,
+                n.Title,
+                n.Description,
+                n.Category,
+                n.ImageUrl,
+                n.CreatedAt,
+                Attachments = n.Attachments
+                    .Select(a => new
+                    {
+                        a.Id,
+                        a.FileName,
+                        a.FileSize,
+                        a.FileUrl
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
 
         if (newsItem == null) return NotFound();
 

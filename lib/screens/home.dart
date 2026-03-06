@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 const Color _primaryColor = Color(0xFFBFA18E);
 const Color _textColor = Color(0xFF1D2939);
@@ -12,20 +13,51 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<dynamic> _notices = [];
+  bool _isLoadingNews = true;
+  String? _newsError;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNews();
+  }
+
+  Future<void> _fetchNews() async {
+    try {
+      final response = await ApiService().getNews();
+      if (!mounted) return;
+      if (response['success']) {
+        setState(() {
+          _notices = response['data'] ?? [];
+          _isLoadingNews = false;
+        });
+      } else {
+        setState(() {
+          _newsError = response['message'] ?? 'Failed to load news';
+          _isLoadingNews = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _newsError = 'Error connecting to server';
+        _isLoadingNews = false;
+      });
+    }
+  }
+
+  String _formatDate(String isoDate) {
+    try {
+      final date = DateTime.parse(isoDate);
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    const notices = <_NoticeData>[
-      _NoticeData(
-        title: 'Beginning-of-year parent meeting',
-        description: 'Parents are invited to attend the meeting at 14:00 this Sunday.',
-        time: '1 hour ago',
-      ),
-      _NoticeData(
-        title: 'Homework reminder',
-        description: 'Complete the Math homework on page 45 before tomorrow.',
-        time: '08:30 This morning',
-      )
-    ];
 
     final List<Map<String, dynamic>> menuItems = [
       {'icon': Icons.assignment_turned_in, 'label': 'Academic results', 'route': '/academic_results'},
@@ -163,13 +195,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
 
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemCount: notices.length,
-                    itemBuilder: (context, index) => _NoticeTile(data: notices[index]),
-                  ),
+                  _isLoadingNews
+                      ? const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+                      : _newsError != null
+                          ? Center(child: Padding(padding: EdgeInsets.all(20), child: Text(_newsError!, style: TextStyle(color: Colors.red))))
+                          : _notices.isEmpty
+                              ? const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('No news available.')))
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  padding: EdgeInsets.zero,
+                                  itemCount: _notices.length,
+                                  itemBuilder: (context, index) {
+                                    final item = _notices[index];
+                                    return _NoticeTile(
+                                      id: item['id'] as int,
+                                      title: item['title']?.toString() ?? 'No Title',
+                                      description: item['category']?.toString() ?? '',
+                                      time: item['createdAt'] != null ? _formatDate(item['createdAt']) : '',
+                                    );
+                                  },
+                                ),
 
                   const SizedBox(height: 20),
                 ],
@@ -233,9 +279,17 @@ class _MenuIcon extends StatelessWidget {
 }
 
 class _NoticeTile extends StatelessWidget {
-  const _NoticeTile({required this.data});
+  final int id;
+  final String title;
+  final String description;
+  final String time;
 
-  final _NoticeData data;
+  const _NoticeTile({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.time,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -245,9 +299,9 @@ class _NoticeTile extends StatelessWidget {
           context,
           '/news_detail',
           arguments: {
-            'title': data.title,
-            'description': data.description,
-            'time': data.time,
+            'id': id,
+            'title': title,
+            'time': time,
           },
         );
       },
@@ -280,7 +334,7 @@ class _NoticeTile extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          data.title,
+                          title,
                           style: const TextStyle(
                             color: _textColor,
                             fontWeight: FontWeight.w600,
@@ -291,14 +345,14 @@ class _NoticeTile extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        data.time,
+                        time,
                         style: TextStyle(color: Colors.grey[400], fontSize: 11),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    data.description,
+                    description,
                     style: TextStyle(color: Colors.grey[600], fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -311,11 +365,4 @@ class _NoticeTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NoticeData {
-  const _NoticeData({required this.title, required this.description, required this.time});
-  final String title;
-  final String description;
-  final String time;
 }
