@@ -179,4 +179,82 @@ class ApiService {
       return {'success': false, 'message': 'Network error ($e). Please try again later.'};
     }
   }
+
+  Future<Map<String, dynamic>?> getUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userStr = prefs.getString(userKey);
+    if (userStr != null) {
+      return jsonDecode(userStr);
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>> getLeaveRequests() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/leave-requests'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'message': 'Failed to load leave requests'};
+      }
+    } catch (e) {
+      print('Network error fetching leave requests: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> submitLeaveRequest({
+    required DateTime requestDate,
+    required String reason,
+  }) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/leave-requests'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'requestDate': requestDate.toIso8601String(),
+          'reason': reason,
+        }),
+      );
+
+      // Return 201 Created
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        String errorMessage = 'Failed to submit leave request';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          }
+        } catch (_) {}
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      print('Network error submitting leave request: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
 }

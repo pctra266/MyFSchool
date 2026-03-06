@@ -28,7 +28,7 @@ public class LeaveRequestsController : ControllerBase
 
         var requests = await _context.LeaveRequests
             .Where(lr => lr.StudentId == studentId)
-            .OrderByDescending(lr => lr.CreatedAt)
+            .OrderByDescending(lr => lr.RequestDate)
             .ToListAsync();
 
         return Ok(requests);
@@ -46,8 +46,6 @@ public class LeaveRequestsController : ControllerBase
             RequestDate = dto.RequestDate,
             Reason = dto.Reason,
             Status = "Pending",
-            DocumentUrl = dto.DocumentUrl,
-            CreatedAt = DateTime.UtcNow
         };
 
         _context.LeaveRequests.Add(request);

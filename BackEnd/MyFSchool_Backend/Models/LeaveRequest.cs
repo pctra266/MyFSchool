@@ -19,11 +19,6 @@ public class LeaveRequest
     [MaxLength(20)]
     public string Status { get; set; } = "Pending";
 
-    [MaxLength(255)]
-    public string? DocumentUrl { get; set; }
-
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-
     // Navigation properties
     [ForeignKey("StudentId")]
     public User? Student { get; set; }
