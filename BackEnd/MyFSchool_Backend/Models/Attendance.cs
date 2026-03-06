@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyFSchool_Backend.Models;
 
+[Table("Attendance")]
 public class Attendance
 {
     [Key]

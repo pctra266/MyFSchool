@@ -1,10 +1,79 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 const Color _primaryColor = Color(0xFFBFA18E);
 const Color _backgroundColor = Color(0xFFF2F4F7);
 
-class AttendanceScreen extends StatelessWidget {
+class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
+
+  @override
+  State<AttendanceScreen> createState() => _AttendanceScreenState();
+}
+
+class _AttendanceScreenState extends State<AttendanceScreen> {
+  final ApiService _apiService = ApiService();
+  bool _isLoading = true;
+  String? _errorMessage;
+  
+  int _presentCount = 0;
+  int _absentCount = 0;
+  int _lateCount = 0;
+  
+  DateTime _currentDate = DateTime.now();
+  List<dynamic> _monthlyData = [];
+
+  final List<String> _months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final summaryRes = await _apiService.getAttendanceSummary();
+      final monthlyRes = await _apiService.getMonthlyAttendance(_currentDate.year, _currentDate.month);
+
+      if (summaryRes['success'] && monthlyRes['success']) {
+        setState(() {
+          _presentCount = summaryRes['data']['present'] ?? 0;
+          _absentCount = summaryRes['data']['absent'] ?? 0;
+          _lateCount = summaryRes['data']['late'] ?? 0;
+          _monthlyData = monthlyRes['data'];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = summaryRes['message'] ?? monthlyRes['message'] ?? 'Failed to load data';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'An error occurred: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _changeMonth(int offset) {
+    setState(() {
+      _currentDate = DateTime(_currentDate.year, _currentDate.month + offset, 1);
+    });
+    _fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,22 +86,26 @@ class AttendanceScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildSummaryCard(),
-              const SizedBox(height: 20),
-              _buildMonthHeader(),
-              const SizedBox(height: 12),
-              _buildCalendarGrid(),
-              const SizedBox(height: 20),
-              _buildLegend(),
-            ],
-          ),
-        ),
-      ),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : _errorMessage != null
+          ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildSummaryCard(),
+                    const SizedBox(height: 20),
+                    _buildMonthHeader(),
+                    const SizedBox(height: 12),
+                    _buildCalendarGrid(),
+                    const SizedBox(height: 20),
+                    _buildLegend(),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
@@ -53,9 +126,9 @@ class AttendanceScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStat('Present', '18', Colors.green),
-          _buildStat('Absent', '1', Colors.red),
-          _buildStat('Late', '2', Colors.orange),
+          _buildStat('Present', '$_presentCount', Colors.green),
+          _buildStat('Absent', '$_absentCount', Colors.red),
+          _buildStat('Late', '$_lateCount', Colors.orange),
         ],
       ),
     );
@@ -85,21 +158,34 @@ class AttendanceScreen extends StatelessWidget {
   }
 
   Widget _buildMonthHeader() {
+    String monthName = _months[_currentDate.month - 1];
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(onPressed: () {}, icon: const Icon(Icons.chevron_left)),
-        const Text(
-          'August 2023',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        IconButton(onPressed: () => _changeMonth(-1), icon: const Icon(Icons.chevron_left)),
+        Text(
+          '$monthName ${_currentDate.year}',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.chevron_right)),
+        IconButton(onPressed: () => _changeMonth(1), icon: const Icon(Icons.chevron_right)),
       ],
     );
   }
 
   Widget _buildCalendarGrid() {
-    // Mockup calendar grid
+    int daysInMonth = DateTime(_currentDate.year, _currentDate.month + 1, 0).day;
+    int firstDayWeekday = DateTime(_currentDate.year, _currentDate.month, 1).weekday;
+    int offset = firstDayWeekday == 7 ? 0 : firstDayWeekday;
+
+    // Create a map to quickly look up attendance status by day
+    Map<int, String> dayStatusMap = {};
+    for (var record in _monthlyData) {
+      if (record['date'] != null && record['status'] != null) {
+        DateTime parsedDate = DateTime.parse(record['date']);
+        dayStatusMap[parsedDate.day] = record['status'];
+      }
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -108,25 +194,30 @@ class AttendanceScreen extends StatelessWidget {
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
-      itemCount: 31 + 2, // Offset for starting day
+      itemCount: daysInMonth + offset,
       itemBuilder: (context, index) {
-        if (index < 2) return const SizedBox.shrink(); // Empty slots
-        int day = index - 1;
+        if (index < offset) return const SizedBox.shrink(); 
+        
+        int day = index - offset + 1;
         bool isWeekend = (index % 7 == 0) || (index % 7 == 6);
         BoxDecoration? decoration;
         Color textColor = Colors.black87;
 
-        if (!isWeekend) {
-           if (day == 12) {
-             decoration = const BoxDecoration(color: Colors.red, shape: BoxShape.circle);
-             textColor = Colors.white;
-           } else if (day == 15 || day == 22) {
-             decoration = const BoxDecoration(color: Colors.orange, shape: BoxShape.circle);
-             textColor = Colors.white;
-           } else if (day > 0 && day <= 25) {
-             decoration = const BoxDecoration(color: Color(0xFFE8F5E9), shape: BoxShape.circle);
-             textColor = Colors.green;
-           }
+        String? status = dayStatusMap[day];
+
+        if (status == 'Present') {
+          decoration = const BoxDecoration(color: const Color(0xFFE8F5E9), shape: BoxShape.circle);
+          textColor = Colors.green;
+        } else if (status == 'Late') {
+          decoration = const BoxDecoration(color: Colors.orange, shape: BoxShape.circle);
+          textColor = Colors.white;
+        } else if (status == 'Absent') {
+          decoration = const BoxDecoration(color: Colors.red, shape: BoxShape.circle);
+          textColor = Colors.white;
+        } else if (!isWeekend) {
+          textColor = Colors.black87;
+        } else {
+          textColor = Colors.grey;
         }
 
         return Container(
