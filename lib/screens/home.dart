@@ -128,10 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.notifications_none, color: Colors.white, size: 28),
                 )
               ],
             ),
@@ -187,11 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('News & Announcements', style: _sectionTitle(context)),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('View all', style: TextStyle(color: _primaryColor)),
-                      )
+                      Text('News & Announcements', style: _sectionTitle(context))
                     ],
                   ),
 

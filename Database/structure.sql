@@ -152,3 +152,14 @@ CREATE TABLE HealthRecords (
     MedicalNotes NVARCHAR(MAX),
     FOREIGN KEY (StudentId) REFERENCES Users(Id)
 );
+
+-- 15. Bảng Notifications
+CREATE TABLE Notifications (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT,
+    Title NVARCHAR(255),
+    Description NVARCHAR(MAX),
+    IsRead BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
+);

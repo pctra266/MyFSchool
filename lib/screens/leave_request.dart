@@ -239,25 +239,6 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
               ),
             ),
           ),
-           const SizedBox(height: 16),
-           const Text('Attached Document (Optional)', style: TextStyle(fontWeight: FontWeight.w600)),
-           const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24),
-               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300, style: BorderStyle.none),
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: const [
-                  Icon(Icons.cloud_upload_outlined, color: Colors.grey, size: 32),
-                  SizedBox(height: 8),
-                  Text('Tap to upload image', style: TextStyle(color: Colors.grey))
-                ],
-              ),
-            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,

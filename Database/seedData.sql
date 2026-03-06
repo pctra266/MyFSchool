@@ -95,3 +95,9 @@ INSERT INTO MealPlans (DayOfWeek, MainDish, SideDish, Soup) VALUES
 INSERT INTO HealthRecords (StudentId, RecordDate, Height, Weight, BMI, BloodType, Allergies, MedicalNotes) VALUES
 (1, '2023-08-01', 160.5, 50.2, 19.48, 'O+', N'None', N'Healthy, no specific medical condition recorded.'),
 (1, '2024-01-15', 162.0, 52.0, 19.81, 'O+', N'None', N'Regular checkup. Good health.');
+
+-- 15. Notifications
+INSERT INTO Notifications (UserId, Title, Description, IsRead, CreatedAt) VALUES
+(1, N'Họp phụ huynh đầu năm', N'Xin trân trọng kính mời quý phụ huynh đến dự buổi họp đầu năm học mới.', 0, DATEADD(hour, -1, GETDATE())),
+(1, N'Nhắc nhở đóng học phí', N'Hạn chót đóng học phí học kỳ 1 sắp đến. Mong quý phụ huynh lưu ý.', 1, DATEADD(hour, -24, GETDATE())),
+(1, N'Thông báo nghỉ lễ', N'Học sinh sẽ được nghỉ lễ Quốc khánh từ ngày 1/9 đến hết ngày 3/9.', 0, DATEADD(day, -5, GETDATE()));

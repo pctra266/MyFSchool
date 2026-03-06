@@ -24,6 +24,7 @@ public class MyFSchoolDbContext : DbContext
     public DbSet<Note> Notes { get; set; }
     public DbSet<MealPlan> MealPlans { get; set; }
     public DbSet<HealthRecord> HealthRecords { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -115,6 +116,13 @@ public class MyFSchoolDbContext : DbContext
             .WithMany()
             .HasForeignKey(n => n.TeacherId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure User -> Notifications
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany(u => u.Notifications)
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<AcademicResult>()
             .Property(ar => ar.Score)

@@ -420,4 +420,83 @@ class ApiService {
       return {'success': false, 'message': 'Network error ($e). Please try again later.'};
     }
   }
+
+  Future<Map<String, dynamic>> getNotifications() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/Notifications'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'message': 'Failed to load notifications'};
+      }
+    } catch (e) {
+      print('Network error fetching notifications: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> markNotificationAsRead(int id) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/Notifications/$id/read'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 204) {
+        return {'success': true};
+      } else {
+        return {'success': false, 'message': 'Failed to mark notification as read'};
+      }
+    } catch (e) {
+      print('Network error marking notification as read: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> markAllNotificationsAsRead() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/Notifications/read-all'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 204) {
+        return {'success': true};
+      } else {
+        return {'success': false, 'message': 'Failed to mark all notifications as read'};
+      }
+    } catch (e) {
+      print('Network error marking all notifications as read: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
 }

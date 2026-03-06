@@ -55,4 +55,5 @@ public class User
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public ICollection<StudentClass> StudentClasses { get; set; } = new List<StudentClass>();
     public ICollection<Note> Notes { get; set; } = new List<Note>();
+    public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
