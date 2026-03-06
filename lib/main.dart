@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/profile.dart';
@@ -18,7 +19,16 @@ import 'screens/reset_password.dart';
 const Color kPrimaryColor = Color(0xFFBFA18E);
 const Color kSurfaceColor = Color(0xFFF4ECE6);
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());
 }
 
