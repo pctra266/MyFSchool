@@ -112,3 +112,14 @@ CREATE TABLE NewsAttachments (
     FOREIGN KEY (NewsId) REFERENCES News(Id)
 );
 
+-- 12. Bảng Notes
+CREATE TABLE Notes (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    StudentId INT,
+    TeacherId INT,
+    Content NVARCHAR(MAX),
+    Type NVARCHAR(50),  -- e.g. Personal, Academic, Behavior
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (StudentId) REFERENCES Users(Id),
+    FOREIGN KEY (TeacherId) REFERENCES Users(Id)
+);

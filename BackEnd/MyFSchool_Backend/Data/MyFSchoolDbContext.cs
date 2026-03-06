@@ -21,6 +21,7 @@ public class MyFSchoolDbContext : DbContext
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<News> News { get; set; }
     public DbSet<NewsAttachment> NewsAttachments { get; set; }
+    public DbSet<Note> Notes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -99,6 +100,19 @@ public class MyFSchoolDbContext : DbContext
             .HasOne(na => na.News)
             .WithMany(n => n.Attachments)
             .HasForeignKey(na => na.NewsId);
+
+        // Configure Note -> Users
+        modelBuilder.Entity<Note>()
+            .HasOne(n => n.Student)
+            .WithMany(u => u.Notes)
+            .HasForeignKey(n => n.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Note>()
+            .HasOne(n => n.Teacher)
+            .WithMany()
+            .HasForeignKey(n => n.TeacherId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<AcademicResult>()
             .Property(ar => ar.Score)
