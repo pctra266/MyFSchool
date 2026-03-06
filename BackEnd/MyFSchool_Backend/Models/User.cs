@@ -28,6 +28,19 @@ public class User
     [MaxLength(100)]
     public string? FocusArea { get; set; }
 
+    public DateTime? DateOfBirth { get; set; }
+
+    [MaxLength(10)]
+    public string? Gender { get; set; }
+
+    public string? Address { get; set; }
+
+    [MaxLength(20)]
+    public string? PhoneNumber { get; set; }
+
+    [MaxLength(100)]
+    public string? ParentName { get; set; }
+
     public bool PushEnabled { get; set; } = true;
 
     public bool EmailEnabled { get; set; } = false;

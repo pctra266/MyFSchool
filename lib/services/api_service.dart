@@ -73,6 +73,33 @@ class ApiService {
     await prefs.remove(userKey);
   }
 
+  Future<Map<String, dynamic>> getProfile() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/Users/profile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'message': 'Failed to load profile'};
+      }
+    } catch (e) {
+      print('Network error fetching profile: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
   Future<Map<String, dynamic>> getAttendanceSummary() async {
     try {
       final token = await getToken();

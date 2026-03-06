@@ -6,6 +6,11 @@ CREATE TABLE Users (
     PasswordHash NVARCHAR(MAX),
     Role NVARCHAR(50),
     FocusArea NVARCHAR(255),
+    DateOfBirth DATE,
+    Gender NVARCHAR(10),
+    Address NVARCHAR(MAX),
+    PhoneNumber NVARCHAR(20),
+    ParentName NVARCHAR(100),
     EmailEnabled BIT DEFAULT 1,     -- Cột EF yêu cầu
     PushEnabled BIT DEFAULT 1,      -- Cột EF yêu cầu
     CreatedAt DATETIME DEFAULT GETDATE() -- Cột EF yêu cầu

@@ -35,6 +35,11 @@ public class UsersController : ControllerBase
             Email = user.Email,
             Role = user.Role,
             FocusArea = user.FocusArea,
+            DateOfBirth = user.DateOfBirth,
+            Gender = user.Gender,
+            Address = user.Address,
+            PhoneNumber = user.PhoneNumber,
+            ParentName = user.ParentName,
             PushEnabled = user.PushEnabled,
             EmailEnabled = user.EmailEnabled
         });
