@@ -72,4 +72,31 @@ class ApiService {
     await prefs.remove(tokenKey);
     await prefs.remove(userKey);
   }
+
+  Future<Map<String, dynamic>> getAcademicResults() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/academic-results'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'message': 'Failed to load academic results'};
+      }
+    } catch (e) {
+      print('Network error fetching academic results: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
 }

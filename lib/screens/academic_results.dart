@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 const Color _primaryColor = Color(0xFFBFA18E);
 const Color _backgroundColor = Color(0xFFF2F4F7);
@@ -15,6 +16,76 @@ class AcademicResultsScreen extends StatefulWidget {
 class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
   int _selectedSemester = 1;
 
+  final ApiService _apiService = ApiService();
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<dynamic> _allResults = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    _fetchResults();
+  }
+
+  Future<void> _fetchResults() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final response = await _apiService.getAcademicResults();
+    if (mounted) {
+      if (response['success']) {
+        setState(() {
+          _allResults = response['data'] ?? [];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = response['message'] ?? 'Failed to load data';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  double _calculateOverallGpa() {
+    if (_allResults.isEmpty) return 0.0;
+    double totalScore = 0;
+    for (var r in _allResults) {
+      final scoreVal = r['score'];
+      totalScore += (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
+    }
+    return totalScore / _allResults.length;
+  }
+
+  List<FlSpot> _getGpaChartSpots() {
+    if (_allResults.isEmpty) return const [FlSpot(0, 0)];
+    
+    final Map<int, List<double>> semesterScores = {};
+    for (var r in _allResults) {
+      final int sem = r['semester'] ?? 1;
+      final scoreVal = r['score'];
+      final double score = (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
+      semesterScores.putIfAbsent(sem, () => []).add(score);
+    }
+    
+    final List<FlSpot> spots = [];
+    final sortedSemesters = semesterScores.keys.toList()..sort();
+    for (int i = 0; i < sortedSemesters.length; i++) {
+      final sem = sortedSemesters[i];
+      final scores = semesterScores[sem]!;
+      final double avg = scores.reduce((a, b) => a + b) / scores.length;
+      spots.add(FlSpot((sem - 1).toDouble(), double.parse(avg.toStringAsFixed(1))));
+    }
+    
+    if (spots.isEmpty) return const [FlSpot(0, 0)];
+    if (spots.length == 1) {
+      spots.add(FlSpot(spots.first.x + 1, spots.first.y));
+    }
+    return spots;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,8 +98,12 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.zero,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
+              : SingleChildScrollView(
+                  padding: EdgeInsets.zero,
         child: Column(
           children: [
             _buildHeader(context),
@@ -94,9 +169,9 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
             style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
-          const _AnimatedCounter(
-            value: 8.9,
-            style: TextStyle(
+          _AnimatedCounter(
+            value: _calculateOverallGpa(),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 56,
               fontWeight: FontWeight.bold,
@@ -219,12 +294,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
           maxY: 10,
           lineBarsData: [
             LineChartBarData(
-              spots: const [
-                FlSpot(0, 8.2),
-                FlSpot(1, 8.5),
-                FlSpot(2, 8.7),
-                FlSpot(3, 8.9),
-              ],
+              spots: _getGpaChartSpots(),
               isCurved: true,
               gradient: const LinearGradient(
                 colors: [_primaryColor, Color(0xFFFFCCBC)],
@@ -310,49 +380,58 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
     );
   }
 
+  List<Map<String, dynamic>> _getFilteredSubjects() {
+    final semesterResults = _allResults.where((r) => r['semester'] == _selectedSemester).toList();
+    
+    final Map<String, Map<String, dynamic>> subjectMap = {};
+    for (var r in semesterResults) {
+      final subjectName = r['subjectName']?.toString() ?? 'Unknown';
+      var teacherName = r['teacherName']?.toString() ?? 'Unknown';
+      
+      final assessmentName = r['assessmentName']?.toString() ?? 'Test';
+      final scoreVal = r['score'];
+      final score = (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
+      
+      if (!subjectMap.containsKey(subjectName)) {
+        subjectMap[subjectName] = {
+          'name': subjectName,
+          'teacher': teacherName,
+          'components': <Map<String, dynamic>>[],
+        };
+      }
+      
+      (subjectMap[subjectName]!['components'] as List).add({
+        'name': assessmentName,
+        'score': score,
+      });
+    }
+    
+    final List<Map<String, dynamic>> finalSubjects = [];
+    for (var subject in subjectMap.values) {
+      final components = subject['components'] as List;
+      double total = 0;
+      for (var comp in components) {
+        total += comp['score'] as double;
+      }
+      double avg = components.isNotEmpty ? total / components.length : 0;
+      subject['avg'] = double.parse(avg.toStringAsFixed(1));
+      finalSubjects.add(subject);
+    }
+    
+    return finalSubjects;
+  }
+
   Widget _buildSubjectList() {
-    final subjects = [
-      {
-        'name': 'Mathematics',
-        'teacher': 'Mr. Anderson',
-        'avg': 9.5,
-        'components': [
-          {'name': '15-min Test', 'score': 9.0},
-          {'name': 'Mid-term', 'score': 9.5},
-          {'name': 'Final', 'score': 10.0},
-        ],
-      },
-      {
-        'name': 'Physics',
-        'teacher': 'Ms. Curie',
-        'avg': 8.8,
-        'components': [
-          {'name': '15-min Test', 'score': 8.5},
-          {'name': 'Mid-term', 'score': 9.0},
-          {'name': 'Final', 'score': 8.5},
-        ],
-      },
-      {
-        'name': 'Literature',
-        'teacher': 'Mr. Shakespeare',
-        'avg': 8.5,
-        'components': [
-          {'name': '15-min Test', 'score': 8.0},
-          {'name': 'Mid-term', 'score': 8.5},
-          {'name': 'Final', 'score': 9.0},
-        ],
-      },
-       {
-        'name': 'English',
-        'teacher': 'Ms. Rowling',
-        'avg': 9.0,
-        'components': [
-          {'name': '15-min Test', 'score': 9.5},
-          {'name': 'Mid-term', 'score': 9.0},
-          {'name': 'Final', 'score': 8.5},
-        ],
-      },
-    ];
+    final subjects = _getFilteredSubjects();
+
+    if (subjects.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text('No academic results found for this semester.', style: TextStyle(color: Colors.grey)),
+        ),
+      );
+    }
 
     return Column(
       children: subjects.map((sub) => _SubjectCard(data: sub)).toList(),

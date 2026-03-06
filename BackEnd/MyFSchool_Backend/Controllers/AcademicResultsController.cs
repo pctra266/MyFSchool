@@ -26,12 +26,14 @@ public class AcademicResultsController : ControllerBase
 
         var results = await _context.AcademicResults
             .Include(ar => ar.Subject)
+                .ThenInclude(s => s!.Teacher)
             .Where(ar => ar.StudentId == studentId)
             .OrderBy(ar => ar.Semester)
             .Select(ar => new
             {
                 ar.Id,
                 SubjectName = ar.Subject!.Name,
+                TeacherName = ar.Subject.Teacher != null ? ar.Subject.Teacher.FullName : "Unknown",
                 ar.Semester,
                 ar.AssessmentName,
                 ar.Score
