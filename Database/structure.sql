@@ -1,117 +1,114 @@
-﻿-- 1. Bảng Người dùng
+﻿-- 1. Bảng Users (Đã sửa tên cột và thêm các cột thiếu)
 CREATE TABLE Users (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    full_name NVARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    role NVARCHAR(50) NOT NULL CHECK (role IN (N'Student', N'Teacher', N'Admin', N'Parent')),
-    focus_area NVARCHAR(100),
-    push_enabled BIT DEFAULT 1, -- 1 là True
-    email_enabled BIT DEFAULT 0, -- 0 là False
-    created_at DATETIME DEFAULT GETDATE()
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    FullName NVARCHAR(255),
+    Email NVARCHAR(255),
+    PasswordHash NVARCHAR(MAX),
+    Role NVARCHAR(50),
+    FocusArea NVARCHAR(255),
+    EmailEnabled BIT DEFAULT 1,     -- Cột EF yêu cầu
+    PushEnabled BIT DEFAULT 1,      -- Cột EF yêu cầu
+    CreatedAt DATETIME DEFAULT GETDATE() -- Cột EF yêu cầu
 );
 
--- 2. Bảng Lớp học
+-- 2. Bảng Classes
 CREATE TABLE Classes (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(50) NOT NULL UNIQUE,
-    created_at DATETIME DEFAULT GETDATE()
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(100)
 );
 
--- 3. Bảng Liên kết Sinh viên - Lớp
+-- 3. Bảng StudentClasses
 CREATE TABLE StudentClasses (
-    student_id INT NOT NULL,
-    class_id INT NOT NULL,
-    PRIMARY KEY (student_id, class_id),
-    CONSTRAINT FK_Student FOREIGN KEY (student_id) REFERENCES Users(id) ON DELETE CASCADE,
-    CONSTRAINT FK_Class FOREIGN KEY (class_id) REFERENCES Classes(id) ON DELETE CASCADE
+    StudentId INT,
+    ClassId INT,
+    PRIMARY KEY (StudentId, ClassId),
+    FOREIGN KEY (StudentId) REFERENCES Users(Id),
+    FOREIGN KEY (ClassId) REFERENCES Classes(Id)
 );
 
--- 4. Bảng Môn học
+-- 4. Bảng Subjects
 CREATE TABLE Subjects (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100) NOT NULL,
-    teacher_id INT NULL,
-    CONSTRAINT FK_Subject_Teacher FOREIGN KEY (teacher_id) REFERENCES Users(id) ON DELETE SET NULL
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(100),
+    TeacherId INT,
+    FOREIGN KEY (TeacherId) REFERENCES Users(Id)
 );
 
--- 5. Bảng Kết quả học tập
+-- 5. Bảng AcademicResults
 CREATE TABLE AcademicResults (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    student_id INT NOT NULL,
-    subject_id INT NOT NULL,
-    semester INT NOT NULL CHECK (semester > 0),
-    assessment_name NVARCHAR(100) NOT NULL,
-    score DECIMAL(4, 2) NOT NULL CHECK (score >= 0 AND score <= 10),
-    CONSTRAINT FK_Result_Student FOREIGN KEY (student_id) REFERENCES Users(id) ON DELETE CASCADE,
-    CONSTRAINT FK_Result_Subject FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE CASCADE
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    StudentId INT,
+    SubjectId INT,
+    Semester INT,
+    AssessmentName NVARCHAR(100),
+    Score DECIMAL(4, 2),
+    FOREIGN KEY (StudentId) REFERENCES Users(Id),
+    FOREIGN KEY (SubjectId) REFERENCES Subjects(Id)
 );
 
--- 6. Thời khóa biểu
+-- 6. Bảng Timetable
 CREATE TABLE Timetable (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    class_id INT NOT NULL,
-    subject_id INT NOT NULL,
-    teacher_id INT NULL,
-    room NVARCHAR(50) NOT NULL,
-    day_of_week NVARCHAR(15) NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    CONSTRAINT FK_Time_Class FOREIGN KEY (class_id) REFERENCES Classes(id) ON DELETE CASCADE,
-    CONSTRAINT FK_Time_Subject FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE CASCADE,
-    CONSTRAINT FK_Time_Teacher FOREIGN KEY (teacher_id) REFERENCES Users(id) ON DELETE SET NULL
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ClassId INT,
+    SubjectId INT,
+    TeacherId INT,
+    Room NVARCHAR(50),
+    DayOfWeek NVARCHAR(20),
+    StartTime TIME,
+    EndTime TIME,
+    FOREIGN KEY (ClassId) REFERENCES Classes(Id),
+    FOREIGN KEY (SubjectId) REFERENCES Subjects(Id),
+    FOREIGN KEY (TeacherId) REFERENCES Users(Id)
 );
 
--- 7. Điểm danh
+-- 7. Bảng Attendance
 CREATE TABLE Attendance (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    student_id INT NOT NULL,
-    attendance_date DATE NOT NULL DEFAULT CAST(GETDATE() AS DATE),
-    status NVARCHAR(20) NOT NULL CHECK (status IN (N'Present', N'Absent', N'Late', N'Excused')),
-    CONSTRAINT FK_Att_Student FOREIGN KEY (student_id) REFERENCES Users(id) ON DELETE CASCADE,
-    CONSTRAINT UQ_Student_Date UNIQUE(student_id, attendance_date)
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    StudentId INT,
+    AttendanceDate DATE,
+    Status NVARCHAR(50),
+    FOREIGN KEY (StudentId) REFERENCES Users(Id)
 );
 
--- 8. Đơn xin nghỉ phép
+-- 8. Bảng LeaveRequests
 CREATE TABLE LeaveRequests (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    student_id INT NOT NULL,
-    request_date DATE NOT NULL,
-    reason NVARCHAR(MAX) NOT NULL, -- Dùng NVARCHAR(MAX) cho nội dung dài
-    status NVARCHAR(20) DEFAULT N'Pending' CHECK (status IN (N'Pending', N'Approved', N'Rejected')),
-    document_url VARCHAR(255),
-    created_at DATETIME DEFAULT GETDATE(),
-    CONSTRAINT FK_Leave_Student FOREIGN KEY (student_id) REFERENCES Users(id) ON DELETE CASCADE
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    StudentId INT,
+    RequestDate DATE,
+    Reason NVARCHAR(MAX),
+    Status NVARCHAR(50),
+    FOREIGN KEY (StudentId) REFERENCES Users(Id)
 );
 
--- 9. Giao dịch tài chính
+-- 9. Bảng Transactions
 CREATE TABLE Transactions (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    student_id INT NOT NULL,
-    title NVARCHAR(150) NOT NULL,
-    amount DECIMAL(15, 2) NOT NULL,
-    transaction_type VARCHAR(20) NOT NULL CHECK (transaction_type IN ('Credit', 'Debit')),
-    status VARCHAR(20) NOT NULL CHECK (status IN ('Paid', 'Success', 'Pending', 'Failed')),
-    transaction_date DATE NOT NULL,
-    created_at DATETIME DEFAULT GETDATE(),
-    CONSTRAINT FK_Trans_Student FOREIGN KEY (student_id) REFERENCES Users(id) ON DELETE CASCADE
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    StudentId INT,
+    Title NVARCHAR(255),
+    Amount DECIMAL(18, 2),
+    TransactionType NVARCHAR(50),
+    Status NVARCHAR(50),
+    TransactionDate DATETIME,
+    FOREIGN KEY (StudentId) REFERENCES Users(Id)
 );
 
--- 10. Tin tức
+-- 10. Bảng News
 CREATE TABLE News (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    title NVARCHAR(200) NOT NULL,
-    description NVARCHAR(MAX) NOT NULL,
-    category NVARCHAR(50) NOT NULL,
-    image_url VARCHAR(255),
-    created_at DATETIME DEFAULT GETDATE()
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(255),
+    Description NVARCHAR(MAX),
+    Category NVARCHAR(100),
+    ImageUrl NVARCHAR(MAX),
+    CreatedAt DATETIME DEFAULT GETDATE()
 );
 
--- 11. Đính kèm tin tức
+-- 11. Bảng NewsAttachments
 CREATE TABLE NewsAttachments (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    news_id INT NOT NULL,
-    file_name NVARCHAR(255) NOT NULL,
-    file_size NVARCHAR(50) NOT NULL,
-    file_url VARCHAR(255) NOT NULL,
-    CONSTRAINT FK_Attach_News FOREIGN KEY (news_id) REFERENCES News(id) ON DELETE CASCADE
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    NewsId INT,
+    FileName NVARCHAR(255),
+    FileSize NVARCHAR(50),
+    FileUrl NVARCHAR(MAX),
+    FOREIGN KEY (NewsId) REFERENCES News(Id)
 );
+

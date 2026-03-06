@@ -99,5 +99,27 @@ public class MyFSchoolDbContext : DbContext
             .HasOne(na => na.News)
             .WithMany(n => n.Attachments)
             .HasForeignKey(na => na.NewsId);
+
+        modelBuilder.Entity<AcademicResult>()
+            .Property(ar => ar.Score)
+            .HasColumnType("decimal(4,2)");
+
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.Amount)
+            .HasColumnType("decimal(15,2)");
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.TransactionDate)
+            .HasColumnType("date");
+
+        modelBuilder.Entity<Attendance>()
+            .Property(a => a.AttendanceDate)
+            .HasColumnType("date")
+            .HasDefaultValueSql("CAST(GETDATE() AS DATE)");
+        modelBuilder.Entity<Attendance>()
+            .HasIndex(a => new { a.StudentId, a.AttendanceDate })
+            .IsUnique();
+        modelBuilder.Entity<Class>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
     }
 }

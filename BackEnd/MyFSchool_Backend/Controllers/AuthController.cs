@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MyFSchool_Backend.Data;
 using MyFSchool_Backend.DTOs;
+using MyFSchool_Backend.Models;
 
 namespace MyFSchool_Backend.Controllers;
 
@@ -25,10 +26,10 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
     {
-        // Simple auth for now since Users table doesn't have a Password column in the schema
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
         
-        if (user == null)
+        // Verify user exists and password is correct using BCrypt
+        if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             return Unauthorized(new { message = "Invalid email or password" });
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -59,8 +60,37 @@ public class AuthController : ControllerBase
                 Role = user.Role,
                 FocusArea = user.FocusArea,
                 PushEnabled = user.PushEnabled,
-                EmailEnabled = user.EmailEnabled
             }
         });
+    }
+
+    [HttpPost("register")]
+    public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
+    {
+        // Check if email already exists
+        if (await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
+        {
+            return BadRequest(new { message = "Email already exists" });
+        }
+
+        // Hash the password
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
+
+        // Create new user
+        var newUser = new User
+        {
+            FullName = registerDto.FullName,
+            Email = registerDto.Email,
+            PasswordHash = passwordHash,
+            Role = registerDto.Role,
+            CreatedAt = DateTime.UtcNow,
+            PushEnabled = true,
+            EmailEnabled = false
+        };
+
+        _context.Users.Add(newUser);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Registration successful" });
     }
 }
