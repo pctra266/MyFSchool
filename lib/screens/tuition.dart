@@ -1,11 +1,121 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../services/api_service.dart';
+import '../models/transaction.dart';
 
 const Color _primaryColor = Color(0xFFBFA18E);
 const Color _backgroundColor = Color(0xFFF2F4F7);
 const Color _textColor = Color(0xFF1D2939);
 
-class TuitionScreen extends StatelessWidget {
+class TuitionScreen extends StatefulWidget {
   const TuitionScreen({super.key});
+
+  @override
+  State<TuitionScreen> createState() => _TuitionScreenState();
+}
+
+class _TuitionScreenState extends State<TuitionScreen> {
+  final ApiService _apiService = ApiService();
+  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'VND');
+  
+  List<Transaction> _transactions = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTransactions();
+  }
+
+  Future<void> _fetchTransactions() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await _apiService.getTransactions();
+      if (response['success'] == true && response['data'] != null) {
+        setState(() {
+          _transactions = (response['data'] as List)
+              .map((item) => Transaction.fromJson(item))
+              .toList();
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = response['message'] ?? 'Failed to load transactions';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'An error occurred while fetching data.';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handlePayment(Transaction transaction) async {
+    // Show confirmation dialog
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm Payment'),
+          content: Text('Do you want to simulate paying for "${transaction.title}"?\nAmount: ${_currencyFormat.format(transaction.amount)}'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(backgroundColor: _primaryColor, foregroundColor: Colors.white),
+              child: const Text('Pay Now'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    // Proceed with payment simulation
+    setState(() {
+      _isLoading = true;
+    });
+
+    final response = await _apiService.payTransaction(transaction.id);
+    if (!mounted) return;
+
+    if (response['success'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment simulated successfully!'), backgroundColor: Colors.green),
+      );
+      _fetchTransactions();
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'] ?? 'Payment failed'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  double _calculateTotalBalance() {
+    double total = 0;
+    for (var tx in _transactions) {
+      if (tx.status.toLowerCase() != 'paid') {
+        total += tx.amount;
+      }
+    }
+    return total;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,55 +128,65 @@ class TuitionScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildBalanceCard(context),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Payment History',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: _textColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTransactionItem(
-                    title: 'Tuition Fee - Term 1',
-                    date: 'Aug 15, 2023',
-                    amount: '5,000,000 VND',
-                    status: 'Paid',
-                    isPositive: false,
-                  ),
-                  _buildTransactionItem(
-                    title: 'Uniform Fee',
-                    date: 'Aug 10, 2023',
-                    amount: '1,200,000 VND',
-                    status: 'Paid',
-                    isPositive: false,
-                  ),
-                  _buildTransactionItem(
-                    title: 'Wallet Top-up',
-                    date: 'Aug 01, 2023',
-                    amount: '10,000,000 VND',
-                    status: 'Success',
-                    isPositive: true,
-                  ),
-                ],
+      body: _isLoading && _transactions.isEmpty
+          ? const Center(child: CircularProgressIndicator(color: _primaryColor))
+          : RefreshIndicator(
+              onRefresh: _fetchTransactions,
+              color: _primaryColor,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    _buildBalanceCard(context),
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Payment History',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      color: _textColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              if (_isLoading)
+                                const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: _primaryColor),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          if (_transactions.isEmpty && !_isLoading && _errorMessage == null)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(32.0),
+                                child: Text('No transactions found.'),
+                              ),
+                            ),
+                          ..._transactions.map((tx) => _buildTransactionItem(tx)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
-      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/payment_confirmation');
+            // Optional: navigate to a generic top-up screen if applicable
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: _primaryColor,
@@ -82,6 +202,8 @@ class TuitionScreen extends StatelessWidget {
   }
 
   Widget _buildBalanceCard(BuildContext context) {
+    final double pendingBalance = _calculateTotalBalance();
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -95,27 +217,18 @@ class TuitionScreen extends StatelessWidget {
       child: Column(
         children: [
           const Text(
-            'Current Balance',
+            'Pending Balance',
             style: TextStyle(color: Colors.white70, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '3,800,000 VND',
-            style: TextStyle(
+          Text(
+            _currencyFormat.format(pendingBalance),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
               fontWeight: FontWeight.bold,
             ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildActionButton(Icons.history, 'History'),
-              const SizedBox(width: 32),
-              _buildActionButton(Icons.qr_code_scanner, 'Scan'),
-            ],
-          ),
+          )
         ],
       ),
     );
@@ -141,13 +254,10 @@ class TuitionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItem({
-    required String title,
-    required String date,
-    required String amount,
-    required String status,
-    required bool isPositive,
-  }) {
+  Widget _buildTransactionItem(Transaction transaction) {
+    bool isCredit = transaction.transactionType.toLowerCase() == 'credit';
+    bool isPaid = transaction.status.toLowerCase() == 'paid' || transaction.status.toLowerCase() == 'success';
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -162,59 +272,84 @@ class TuitionScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isPositive ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isPositive ? Icons.add : Icons.remove,
-              color: isPositive ? Colors.green : Colors.orange,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: _textColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  date,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
             children: [
-              Text(
-                (isPositive ? '+ ' : '- ') + amount,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: isPositive ? Colors.green : Colors.redAccent,
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isCredit ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isCredit ? Icons.add : Icons.remove,
+                  color: isCredit ? Colors.green : Colors.orange,
+                  size: 20,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                status,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: _textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      transaction.transactionDate != null
+                          ? DateFormat('MMM dd, yyyy').format(transaction.transactionDate!)
+                          : 'No Date',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    (isCredit ? '+ ' : '- ') + _currencyFormat.format(transaction.amount),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isCredit ? Colors.green : Colors.redAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    transaction.status,
+                    style: TextStyle(
+                      color: isPaid ? Colors.green : Colors.orange,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          if (!isPaid) ...[
+            const Divider(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => _handlePayment(transaction),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _primaryColor,
+                  side: const BorderSide(color: _primaryColor),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Pay Now'),
+              ),
+            ),
+          ]
         ],
       ),
     );

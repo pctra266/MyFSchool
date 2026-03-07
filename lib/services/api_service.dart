@@ -557,4 +557,57 @@ class ApiService {
       return {'success': false, 'message': 'Network error ($e). Please try again later.'};
     }
   }
+
+  Future<Map<String, dynamic>> getTransactions() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/Transactions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'message': 'Failed to load transactions'};
+      }
+    } catch (e) {
+      print('Network error fetching transactions: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> payTransaction(int id) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/Transactions/pay/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true};
+      } else {
+        return {'success': false, 'message': 'Failed to pay transaction'};
+      }
+    } catch (e) {
+      print('Network error paying transaction: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
 }

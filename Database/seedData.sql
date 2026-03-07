@@ -3,7 +3,7 @@
 
 -- 1. Insert Users (Đã sửa tên cột và thêm EmailEnabled, PushEnabled, CreatedAt)
 INSERT INTO Users (FullName, Email, PasswordHash, Role, FocusArea, DateOfBirth, Gender, Address, PhoneNumber, ParentName, EmailEnabled, PushEnabled, CreatedAt) VALUES
-(N'Alice CrawlingOne', 'alice.student@email.com', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Student', '10A1', '2008-08-15', N'Nữ', N'123 Đường ABC, Phường X, Quận Y, Hà Nội', '0901234567', N'Nguyễn Văn C', 1, 1, GETDATE()),
+(N'Alice CrawlingOne', 'trapche186790@gmail.com', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Student', '10A1', '2008-08-15', N'Nữ', N'123 Đường ABC, Phường X, Quận Y, Hà Nội', '0901234567', N'Nguyễn Văn C', 1, 1, GETDATE()),
 (N'4nim0sity', 'dangcap@email.com', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Student', 'Product design lead', '2008-05-10', N'Nam', N'456 Đường DEF, Phường Z, Quận W, Hà Nội', '0987654321', N'Trần Văn D', 1, 1, GETDATE()),
 (N'Mr. Anderson', 'anderson@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Teacher', 'Mathematics', '1980-01-01', N'Nam', N'789 Đường GHI', '0912345678', NULL, 1, 1, GETDATE()),
 (N'Ms. Curie', 'curie@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Teacher', 'Physics', '1985-02-02', N'Nữ', N'123 Đường KLM', '0923456789', NULL, 1, 1, GETDATE()),
@@ -53,9 +53,9 @@ INSERT INTO Timetable (ClassId, SubjectId, TeacherId, Room, DayOfWeek, StartTime
 
 -- 7. Attendance
 INSERT INTO Attendance (StudentId, AttendanceDate, Status) VALUES
-(1, '2023-08-01', 'Present'), (1, '2023-08-02', 'Present'),
-(1, '2023-08-03', 'Present'), (1, '2023-08-04', 'Present'),
-(1, '2023-08-15', 'Late'),    (1, '2023-08-12', 'Absent');
+(1, '2026-08-01', 'Present'), (1, '2026-08-02', 'Present'),
+(1, '2026-08-03', 'Present'), (1, '2026-08-04', 'Present'),
+(1, '2026-08-15', 'Late'),    (1, '2026-08-12', 'Absent');
 
 -- 8. Leave requests
 INSERT INTO LeaveRequests (StudentId, RequestDate, Reason, Status) VALUES

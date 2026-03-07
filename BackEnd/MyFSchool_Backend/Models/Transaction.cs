@@ -27,8 +27,6 @@ public class Transaction
     [Required]
     public DateTime TransactionDate { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-
     // Navigation properties
     [ForeignKey("StudentId")]
     public User? Student { get; set; }
