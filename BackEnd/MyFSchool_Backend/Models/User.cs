@@ -47,6 +47,11 @@ public class User
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+    [MaxLength(10)]
+    public string? ResetPasswordOtp { get; set; }
+
+    public DateTime? ResetPasswordExpiry { get; set; }
+
     // Navigation properties
     public ICollection<Subject> TaughtSubjects { get; set; } = new List<Subject>();
     public ICollection<AcademicResult> AcademicResults { get; set; } = new List<AcademicResult>();

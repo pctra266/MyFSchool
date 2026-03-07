@@ -13,7 +13,9 @@ CREATE TABLE Users (
     ParentName NVARCHAR(100),
     EmailEnabled BIT DEFAULT 1,     -- Cột EF yêu cầu
     PushEnabled BIT DEFAULT 1,      -- Cột EF yêu cầu
-    CreatedAt DATETIME DEFAULT GETDATE() -- Cột EF yêu cầu
+    CreatedAt DATETIME DEFAULT GETDATE(), -- Cột EF yêu cầu
+    ResetPasswordOtp NVARCHAR(10),
+    ResetPasswordExpiry DATETIME
 );
 
 -- 2. Bảng Classes

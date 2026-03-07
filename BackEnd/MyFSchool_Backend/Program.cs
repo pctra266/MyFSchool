@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddScoped<MyFSchool_Backend.Services.IEmailService, MyFSchool_Backend.Services.EmailService>();
 
 // Add CORS policy to allow Flutter Web (or any client during development) to access the API
 builder.Services.AddCors(options =>

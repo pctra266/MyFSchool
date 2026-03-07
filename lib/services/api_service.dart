@@ -60,6 +60,64 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/Auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'message': data['message'] ?? 'OTP sent'};
+      } else {
+        String errorMessage = 'Failed to send OTP';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          }
+        } catch (_) {}
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      print('Forgot Password network error: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword(String email, String otp, String newPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/Auth/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'otp': otp,
+          'newPassword': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'message': data['message'] ?? 'Password reset successfully'};
+      } else {
+        String errorMessage = 'Failed to reset password';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          }
+        } catch (_) {}
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      print('Reset Password network error: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
   // Helper method to retrieve token
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();

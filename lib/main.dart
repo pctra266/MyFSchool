@@ -14,7 +14,7 @@ import 'screens/health_records.dart';
 import 'screens/notification.dart';
 import 'screens/news_detail.dart';
 import 'screens/payment_confirmation.dart';
-import 'screens/reset_password.dart';
+import 'screens/forgot_password.dart';
 
 const Color kPrimaryColor = Color(0xFFBFA18E);
 const Color kSurfaceColor = Color(0xFFF4ECE6);
@@ -111,7 +111,7 @@ class MyApp extends StatelessWidget {
         '/health_records': (context) => const HealthRecordsScreen(),
         '/payment_confirmation': (context) => const PaymentConfirmationScreen(),
         '/news_detail': (context) => NewsDetailScreen(newsItem: ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>),
-        '/reset_password': (context) => const ResetPasswordScreen(),
+        '/forgot_password': (context) => const ForgotPasswordScreen(),
       },
     );
   }

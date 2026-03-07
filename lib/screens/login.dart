@@ -207,7 +207,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         alignment: Alignment.center,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/reset_password');
+                            Navigator.pushNamed(context, '/forgot_password');
                           },
                           child: Text(
                             'Forgot Password?',
