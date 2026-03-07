@@ -2,9 +2,12 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MyFSchool_Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddScoped<MyFSchool_Backend.Services.IEmailService, MyFSchool_Backend.Services.EmailService>();
