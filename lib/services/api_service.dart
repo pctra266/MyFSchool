@@ -601,9 +601,21 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return {'success': true};
+        final data = jsonDecode(response.body);
+        // VNPay Flow returns { paymentUrl: '...' }
+        if (data != null && data['paymentUrl'] != null) {
+          return {'success': true, 'paymentUrl': data['paymentUrl']};
+        }
+        return {'success': true}; // Fallback for old mock structure
       } else {
-        return {'success': false, 'message': 'Failed to pay transaction'};
+        String errorMessage = 'Failed to pay transaction';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          }
+        } catch (_) {}
+        return {'success': false, 'message': errorMessage};
       }
     } catch (e) {
       print('Network error paying transaction: $e');

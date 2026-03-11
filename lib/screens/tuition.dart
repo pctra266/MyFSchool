@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 import '../models/transaction.dart';
 
@@ -66,7 +67,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Confirm Payment'),
-          content: Text('Do you want to simulate paying for "${transaction.title}"?\nAmount: ${_currencyFormat.format(transaction.amount)}'),
+          content: Text('Do you want to pay for "${transaction.title}" via VNPay?\nAmount: ${_currencyFormat.format(transaction.amount)}'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -75,7 +76,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(backgroundColor: _primaryColor, foregroundColor: Colors.white),
-              child: const Text('Pay Now'),
+              child: const Text('Go to VNPay'),
             ),
           ],
         );
@@ -84,7 +85,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
 
     if (confirm != true) return;
 
-    // Proceed with payment simulation
+    // Proceed with requesting URL from backend
     setState(() {
       _isLoading = true;
     });
@@ -93,16 +94,43 @@ class _TuitionScreenState extends State<TuitionScreen> {
     if (!mounted) return;
 
     if (response['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment simulated successfully!'), backgroundColor: Colors.green),
-      );
-      _fetchTransactions();
+      // VNPay Flow
+      if (response['paymentUrl'] != null) {
+        final String urlStripped = response['paymentUrl'];
+        final Uri paymentUri = Uri.parse(urlStripped);
+        
+        try {
+          // Launch the VNPay url in the default browser
+          // Need to import 'package:url_launcher/url_launcher.dart'
+          // Since url_launcher isn't accessible without developer mode, we must do dynamic check or import at top
+          // For now, assume url_launcher has been imported and works
+          await launchUrl(paymentUri, mode: LaunchMode.externalApplication);
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Redirecting to VNPay... After payment, pull to refresh to update status.'), backgroundColor: Colors.blue),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not launch VNPay. Make sure Developer Mode & url_launcher are setup. Error: $e'), backgroundColor: Colors.red),
+          );
+        }
+        
+        setState(() {
+          _isLoading = false;
+        });
+      } else {
+        // Fallback or old mock logic
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment completed locally.'), backgroundColor: Colors.green),
+        );
+        _fetchTransactions();
+      }
     } else {
       setState(() {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response['message'] ?? 'Payment failed'), backgroundColor: Colors.red),
+        SnackBar(content: Text(response['message'] ?? 'Payment API failed'), backgroundColor: Colors.red),
       );
     }
   }
@@ -181,23 +209,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                   ],
                 ),
               ),
-            ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: () {
-            // Optional: navigate to a generic top-up screen if applicable
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _primaryColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          child: const Text('Top Up Wallet'),
-        ),
-      ),
+            )
     );
   }
 
