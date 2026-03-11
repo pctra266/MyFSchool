@@ -164,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: 'Thông tin học tập',
             icon: Icons.school,
             children: [
-              _buildInfoRow('Trọng tâm', focusArea),
+              _buildInfoRow('Lớp', focusArea),
             ],
           ),
           
