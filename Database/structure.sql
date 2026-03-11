@@ -4,7 +4,6 @@ CREATE TABLE Users (
     FullName NVARCHAR(255),
     Email NVARCHAR(255),
     PasswordHash NVARCHAR(MAX),
-    Role NVARCHAR(50),
     FocusArea NVARCHAR(255),
     DateOfBirth DATE,
     Gender NVARCHAR(10),
@@ -16,6 +15,21 @@ CREATE TABLE Users (
     CreatedAt DATETIME DEFAULT GETDATE(), -- Cột EF yêu cầu
     ResetPasswordOtp NVARCHAR(10),
     ResetPasswordExpiry DATETIME
+);
+
+-- 1A. Bảng Roles
+CREATE TABLE Roles (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(50) NOT NULL
+);
+
+-- 1B. Bảng UserRoles
+CREATE TABLE UserRoles (
+    UserId INT,
+    RoleId INT,
+    PRIMARY KEY (UserId, RoleId),
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+    FOREIGN KEY (RoleId) REFERENCES Roles(Id)
 );
 
 -- 2. Bảng Classes

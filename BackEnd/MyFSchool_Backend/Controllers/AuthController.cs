@@ -28,7 +28,10 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+        var user = await _context.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
         
         // Verify user exists and password is correct using BCrypt
         if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
@@ -36,14 +39,20 @@ public class AuthController : ControllerBase
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "fallback_secret_key_1234567890123456");
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
+
+        foreach (var userRole in user.UserRoles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+        }
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            }),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddDays(7),
             Issuer = _configuration["Jwt:Issuer"],
             Audience = _configuration["Jwt:Audience"],
@@ -59,7 +68,7 @@ public class AuthController : ControllerBase
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email,
-                Role = user.Role,
+                Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
                 FocusArea = user.FocusArea,
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender,
@@ -90,11 +99,20 @@ public class AuthController : ControllerBase
             FullName = registerDto.FullName,
             Email = registerDto.Email,
             PasswordHash = passwordHash,
-            Role = registerDto.Role,
             CreatedAt = DateTime.UtcNow,
             PushEnabled = true,
             EmailEnabled = false
         };
+
+        // Resolve roles
+        foreach (var roleName in registerDto.Roles)
+        {
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+            if (role != null)
+            {
+                newUser.UserRoles.Add(new UserRole { Role = role });
+            }
+        }
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();

@@ -2,14 +2,30 @@
 -- DELETE FROM NewsAttachments; DELETE FROM News; DELETE FROM Transactions; ...
 
 -- 1. Insert Users (Đã sửa tên cột và thêm EmailEnabled, PushEnabled, CreatedAt)
-INSERT INTO Users (FullName, Email, PasswordHash, Role, FocusArea, DateOfBirth, Gender, Address, PhoneNumber, ParentName, EmailEnabled, PushEnabled, CreatedAt) VALUES
-(N'Alice CrawlingOne', 'trapche186790@gmail.com', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Student', '10A1', '2008-08-15', N'Nữ', N'123 Đường ABC, Phường X, Quận Y, Hà Nội', '0901234567', N'Nguyễn Văn C', 1, 1, GETDATE()),
-(N'4nim0sity', 'dangcap@email.com', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Student', 'Product design lead', '2008-05-10', N'Nam', N'456 Đường DEF, Phường Z, Quận W, Hà Nội', '0987654321', N'Trần Văn D', 1, 1, GETDATE()),
-(N'Mr. Anderson', 'anderson@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Teacher', 'Mathematics', '1980-01-01', N'Nam', N'789 Đường GHI', '0912345678', NULL, 1, 1, GETDATE()),
-(N'Ms. Curie', 'curie@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Teacher', 'Physics', '1985-02-02', N'Nữ', N'123 Đường KLM', '0923456789', NULL, 1, 1, GETDATE()),
-(N'Mr. Shakespeare', 'shakespeare@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Teacher', 'Literature', '1975-03-03', N'Nam', N'456 Đường NOP', '0934567890', NULL, 1, 1, GETDATE()),
-(N'Mr. Bolt', 'bolt@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Teacher', 'Physical Education', '1990-04-04', N'Nam', N'789 Đường QRS', '0945678901', NULL, 1, 1, GETDATE()),
-(N'Ms. Rowling', 'rowling@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Teacher', 'English', '1982-05-05', N'Nữ', N'123 Đường TUV', '0956789012', NULL, 1, 1, GETDATE());
+INSERT INTO Users (FullName, Email, PasswordHash, FocusArea, DateOfBirth, Gender, Address, PhoneNumber, ParentName, EmailEnabled, PushEnabled, CreatedAt) VALUES
+(N'Alice CrawlingOne', 'trapche186790@gmail.com', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', '10A1', '2008-08-15', N'Nữ', N'123 Đường ABC, Phường X, Quận Y, Hà Nội', '0901234567', N'Nguyễn Văn C', 1, 1, GETDATE()),
+(N'4nim0sity', 'dangcap@email.com', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Product design lead', '2008-05-10', N'Nam', N'456 Đường DEF, Phường Z, Quận W, Hà Nội', '0987654321', N'Trần Văn D', 1, 1, GETDATE()),
+(N'Mr. Anderson', 'anderson@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Mathematics', '1980-01-01', N'Nam', N'789 Đường GHI', '0912345678', NULL, 1, 1, GETDATE()),
+(N'Ms. Curie', 'curie@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Physics', '1985-02-02', N'Nữ', N'123 Đường KLM', '0923456789', NULL, 1, 1, GETDATE()),
+(N'Mr. Shakespeare', 'shakespeare@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Literature', '1975-03-03', N'Nam', N'456 Đường NOP', '0934567890', NULL, 1, 1, GETDATE()),
+(N'Mr. Bolt', 'bolt@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'Physical Education', '1990-04-04', N'Nam', N'789 Đường QRS', '0945678901', NULL, 1, 1, GETDATE()),
+(N'Ms. Rowling', 'rowling@school.edu', '$2a$11$MLvO0pyA0xkpYQdJxwrgUu8A/DVgfnDNunBy0bkdQkguoI0vLjUQ.', 'English', '1982-05-05', N'Nữ', N'123 Đường TUV', '0956789012', NULL, 1, 1, GETDATE());
+
+-- 1A. Insert Roles
+INSERT INTO Roles (Name) VALUES
+('Student'),
+('Teacher'),
+('Admin');
+
+-- 1B. Insert UserRoles
+INSERT INTO UserRoles (UserId, RoleId) VALUES
+(1, 1), -- Alice (Student)
+(2, 1), -- 4nim0sity (Student)
+(3, 2), -- Mr. Anderson (Teacher)
+(4, 2), -- Ms. Curie (Teacher)
+(5, 2), -- Mr. Shakespeare (Teacher)
+(6, 2), -- Mr. Bolt (Teacher)
+(7, 2); -- Ms. Rowling (Teacher)
 
 -- 2. Insert Classes
 INSERT INTO Classes (Name) VALUES

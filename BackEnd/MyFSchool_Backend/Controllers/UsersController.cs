@@ -25,7 +25,11 @@ public class UsersController : ControllerBase
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+            
         if (user == null) return NotFound();
 
         return Ok(new UserProfileDto
@@ -33,7 +37,7 @@ public class UsersController : ControllerBase
             Id = user.Id,
             FullName = user.FullName,
             Email = user.Email,
-            Role = user.Role,
+            Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
             FocusArea = user.FocusArea,
             DateOfBirth = user.DateOfBirth,
             Gender = user.Gender,

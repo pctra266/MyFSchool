@@ -21,9 +21,7 @@ public class User
     [MaxLength(255)]
     public string PasswordHash { get; set; } = string.Empty;
 
-    [Required]
-    [MaxLength(50)]
-    public string Role { get; set; } = string.Empty;
+    public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
     [MaxLength(100)]
     public string? FocusArea { get; set; }
