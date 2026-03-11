@@ -342,6 +342,80 @@ class ApiService {
       return {'success': false, 'message': 'Network error ($e). Please try again later.'};
     }
   }
+
+  Future<Map<String, dynamic>> updateLeaveRequest({
+    required int id,
+    required DateTime requestDate,
+    required String reason,
+  }) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/leave-requests/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'requestDate': requestDate.toIso8601String(),
+          'reason': reason,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return {'success': true};
+      } else {
+        String errorMessage = 'Failed to update leave request';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          }
+        } catch (_) {}
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      print('Network error updating leave request: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteLeaveRequest(int id) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/api/leave-requests/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return {'success': true};
+      } else {
+        String errorMessage = 'Failed to delete leave request';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          }
+        } catch (_) {}
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      print('Network error deleting leave request: $e');
+      return {'success': false, 'message': 'Network error ($e). Please try again later.'};
+    }
+  }
   Future<Map<String, dynamic>> getNotes() async {
     try {
       final token = await getToken();

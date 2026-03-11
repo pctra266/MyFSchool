@@ -53,4 +53,48 @@ public class LeaveRequestsController : ControllerBase
 
         return CreatedAtAction(nameof(GetRequests), new { id = request.Id }, request);
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateRequest(int id, [FromBody] LeaveRequestDto dto)
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out var studentId)) return Unauthorized();
+
+        var request = await _context.LeaveRequests
+            .FirstOrDefaultAsync(lr => lr.Id == id && lr.StudentId == studentId);
+
+        if (request == null)
+            return NotFound(new { message = "Leave request not found." });
+
+        if (request.Status != "Pending")
+            return BadRequest(new { message = "Only pending requests can be updated." });
+
+        request.RequestDate = dto.RequestDate;
+        request.Reason = dto.Reason;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(request);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteRequest(int id)
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out var studentId)) return Unauthorized();
+
+        var request = await _context.LeaveRequests
+            .FirstOrDefaultAsync(lr => lr.Id == id && lr.StudentId == studentId);
+
+        if (request == null)
+            return NotFound(new { message = "Leave request not found." });
+
+        if (request.Status != "Pending")
+            return BadRequest(new { message = "Only pending requests can be deleted." });
+
+        _context.LeaveRequests.Remove(request);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

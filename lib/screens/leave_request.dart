@@ -20,6 +20,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
   bool _isSubmitting = false;
   Map<String, dynamic>? _userData;
   List<dynamic> _leaveRequests = [];
+  int? _editingRequestId;
 
   @override
   void initState() {
@@ -63,29 +64,86 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
     setState(() => _isSubmitting = true);
 
     final apiService = ApiService();
-    final response = await apiService.submitLeaveRequest(
-      requestDate: _selectedDate!,
-      reason: reason,
-    );
+    Map<String, dynamic> response;
+    
+    if (_editingRequestId != null) {
+      response = await apiService.updateLeaveRequest(
+        id: _editingRequestId!,
+        requestDate: _selectedDate!,
+        reason: reason,
+      );
+    } else {
+      response = await apiService.submitLeaveRequest(
+        requestDate: _selectedDate!,
+        reason: reason,
+      );
+    }
 
     setState(() => _isSubmitting = false);
 
     if (response['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Leave request submitted successfully'),
+        SnackBar(
+          content: Text(_editingRequestId != null ? 'Leave request updated successfully' : 'Leave request submitted successfully'),
           backgroundColor: Colors.green,
         ),
       );
       _reasonController.clear();
-      setState(() => _selectedDate = null);
+      setState(() {
+        _selectedDate = null;
+        _editingRequestId = null;
+      });
       _fetchData(); // Refresh the list
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(response['message'] ?? 'Failed to submit request'),
+          content: Text(response['message'] ?? 'Failed to process request'),
           backgroundColor: Colors.red,
         ),
+      );
+    }
+  }
+
+  Future<void> _deleteRequest(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Delete'),
+        content: const Text('Are you sure you want to delete this leave request?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isLoading = true);
+    final apiService = ApiService();
+    final response = await apiService.deleteLeaveRequest(id);
+    
+    if (response['success'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Leave request deleted'), backgroundColor: Colors.green),
+      );
+      if (_editingRequestId == id) {
+         _reasonController.clear();
+         _selectedDate = null;
+         _editingRequestId = null;
+      }
+      _fetchData();
+    } else {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'] ?? 'Failed to delete request'), backgroundColor: Colors.red),
       );
     }
   }
@@ -240,25 +298,47 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
             ),
           ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitRequest,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                if (_editingRequestId != null) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _editingRequestId = null;
+                          _selectedDate = null;
+                          _reasonController.clear();
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submitRequest,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    child: _isSubmitting 
+                      ? const SizedBox(
+                          width: 24, 
+                          height: 24, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        )
+                      : Text(_editingRequestId != null ? 'Update Request' : 'Submit Request'),
+                  ),
                 ),
-                child: _isSubmitting 
-                  ? const SizedBox(
-                      width: 24, 
-                      height: 24, 
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                    )
-                  : const Text('Submit Request'),
-              ),
+              ],
             ),
         ],
       ),
@@ -342,11 +422,39 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                reason,
-                style: TextStyle(color: Colors.grey.shade700),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      reason,
+                      style: TextStyle(color: Colors.grey.shade700),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (status.toString().toLowerCase() == 'pending') ...[
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: _primaryColor, size: 20),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      onPressed: () {
+                        setState(() {
+                          _editingRequestId = request['id'];
+                          _selectedDate = date;
+                          _reasonController.text = reason;
+                        });
+                        // Optional: Scroll to top
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      onPressed: () => _deleteRequest(request['id']),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
