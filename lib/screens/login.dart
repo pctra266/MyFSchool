@@ -104,7 +104,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Email',
+                          'Email / Số điện thoại',
                           style: TextStyle(
                             color: _labelColor,
                             fontWeight: FontWeight.w600,
@@ -115,8 +115,9 @@ class _SignInScreenState extends State<SignInScreen> {
                       TextFormField(
                         controller: _userController,
                         cursorColor: _primaryColor,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
-                          hintText: 'example@email.com',
+                          hintText: 'Email hoặc số điện thoại',
                           hintStyle: TextStyle(color: Colors.grey),
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 12),
@@ -127,8 +128,12 @@ class _SignInScreenState extends State<SignInScreen> {
                             borderSide: BorderSide(color: _primaryColor, width: 2),
                           ),
                         ),
-                        validator: (value) =>
-                            value == null || value.isEmpty ? 'Please enter email' : null,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Vui lòng nhập email hoặc số điện thoại';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 24),
                       Align(

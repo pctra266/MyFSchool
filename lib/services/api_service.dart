@@ -19,13 +19,16 @@ class ApiService {
   static const String tokenKey = 'jwt_token';
   static const String userKey = 'user_data';
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String emailOrPhone, String password) async {
     try {
+      // Auto detect: if input contains '@' it's an email, otherwise phone number
+      final bool isEmail = emailOrPhone.contains('@');
+
       final response = await http.post(
         Uri.parse('$baseUrl/api/Auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': email,
+          if (isEmail) 'email': emailOrPhone else 'phoneNumber': emailOrPhone,
           'password': password,
         }),
       );
