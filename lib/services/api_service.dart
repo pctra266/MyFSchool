@@ -63,12 +63,19 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> forgotPassword(String email) async {
+  Future<Map<String, dynamic>> forgotPassword({String? email, String? phoneNumber}) async {
     try {
+      final Map<String, dynamic> body = {};
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        body['phoneNumber'] = phoneNumber;
+      } else if (email != null && email.isNotEmpty) {
+        body['email'] = email;
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/api/Auth/forgot-password'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
+        body: jsonEncode(body),
       );
 
       if (response.statusCode == 200) {
@@ -90,16 +97,22 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> resetPassword(String email, String otp, String newPassword) async {
+  Future<Map<String, dynamic>> resetPassword({String? email, String? phoneNumber, required String otp, required String newPassword}) async {
     try {
+      final Map<String, dynamic> body = {
+        'otp': otp,
+        'newPassword': newPassword,
+      };
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        body['phoneNumber'] = phoneNumber;
+      } else if (email != null && email.isNotEmpty) {
+        body['email'] = email;
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/api/Auth/reset-password'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'otp': otp,
-          'newPassword': newPassword,
-        }),
+        body: jsonEncode(body),
       );
 
       if (response.statusCode == 200) {

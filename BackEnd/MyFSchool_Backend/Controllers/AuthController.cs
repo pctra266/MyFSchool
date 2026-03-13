@@ -138,12 +138,23 @@ public class AuthController : ControllerBase
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        
-        // We still return Ok even if user not found to prevent email enumeration,
-        // but for this project we can return 400 for easier debugging if needed.
-        if (user == null)
-            return BadRequest(new { message = "User with this email not found" });
+        // Validate: at least one of email or phoneNumber must be provided
+        if (string.IsNullOrWhiteSpace(dto.Email) && string.IsNullOrWhiteSpace(dto.PhoneNumber))
+            return BadRequest(new { message = "Email hoặc số điện thoại là bắt buộc" });
+
+        User? user;
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            if (user == null)
+                return BadRequest(new { message = "Không tìm thấy tài khoản với số điện thoại này" });
+        }
+        else
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (user == null)
+                return BadRequest(new { message = "Không tìm thấy tài khoản với email này" });
+        }
 
         // Generate 6-digit OTP
         Random random = new Random();
@@ -155,26 +166,47 @@ public class AuthController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        // Send Email
-        await _emailService.SendOtpEmailAsync(user.Email, otp);
-
-        return Ok(new { message = "OTP has been sent to your email" });
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
+        {
+            // TODO: Integrate real SMS service (Twilio, ESMS.vn, etc.)
+            Console.WriteLine($"[SMS Mock] OTP for {dto.PhoneNumber}: {otp}");
+            return Ok(new { message = $"Mã OTP đã được gửi đến số điện thoại {dto.PhoneNumber}" });
+        }
+        else
+        {
+            // Send OTP via Email
+            await _emailService.SendOtpEmailAsync(user.Email, otp);
+            return Ok(new { message = "Mã OTP đã được gửi đến email của bạn" });
+        }
     }
 
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        
-        if (user == null)
-            return BadRequest(new { message = "User with this email not found" });
+        // Validate: at least one of email or phoneNumber must be provided
+        if (string.IsNullOrWhiteSpace(dto.Email) && string.IsNullOrWhiteSpace(dto.PhoneNumber))
+            return BadRequest(new { message = "Email hoặc số điện thoại là bắt buộc" });
+
+        User? user;
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            if (user == null)
+                return BadRequest(new { message = "Không tìm thấy tài khoản với số điện thoại này" });
+        }
+        else
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (user == null)
+                return BadRequest(new { message = "Không tìm thấy tài khoản với email này" });
+        }
 
         // Verify OTP (Check expiry first, then value)
         if (user.ResetPasswordExpiry == null || user.ResetPasswordExpiry < DateTime.Now)
-            return BadRequest(new { message = "OTP has expired" });
+            return BadRequest(new { message = "Mã OTP đã hết hạn" });
 
         if (user.ResetPasswordOtp != dto.Otp)
-            return BadRequest(new { message = "Invalid OTP" });
+            return BadRequest(new { message = "Mã OTP không hợp lệ" });
 
         // OTP is valid. Hash new password
         string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
@@ -186,6 +218,6 @@ public class AuthController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "Password has been successfully reset" });
+        return Ok(new { message = "Mật khẩu đã được đặt lại thành công" });
     }
 }

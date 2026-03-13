@@ -4,16 +4,21 @@ namespace MyFSchool_Backend.DTOs;
 
 public class ForgotPasswordDto
 {
-    [Required]
+    // Either Email or PhoneNumber must be provided
     [EmailAddress]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
+
+    [MaxLength(20)]
+    public string? PhoneNumber { get; set; }
 }
 
 public class ResetPasswordDto
 {
-    [Required]
+    // Either Email or PhoneNumber must be provided
     [EmailAddress]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
+
+    public string? PhoneNumber { get; set; }
 
     [Required]
     public string Otp { get; set; } = string.Empty;

@@ -5,10 +5,16 @@ const Color _primaryColor = Color(0xFFBFA18E);
 const Color _backgroundColor = Color(0xFFF2F4F7);
 
 class ResetPasswordScreen extends StatefulWidget {
-  final String email;
+  final String? email;
+  final String? phoneNumber;
   final String otp;
 
-  const ResetPasswordScreen({super.key, required this.email, required this.otp});
+  const ResetPasswordScreen({
+    super.key,
+    this.email,
+    this.phoneNumber,
+    required this.otp,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -26,34 +32,45 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     if (newPassword.isEmpty || newPassword.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password must be at least 6 characters')),
+        const SnackBar(content: Text('Mật khẩu phải có ít nhất 6 ký tự')),
       );
       return;
     }
 
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+        const SnackBar(content: Text('Mật khẩu xác nhận không khớp')),
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    final result = await ApiService().resetPassword(widget.email, widget.otp, newPassword);
+    final result = await ApiService().resetPassword(
+      email: widget.email,
+      phoneNumber: widget.phoneNumber,
+      otp: widget.otp,
+      newPassword: newPassword,
+    );
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'Password reset successfully'), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text(result['message'] ?? 'Đặt lại mật khẩu thành công'),
+          backgroundColor: Colors.green,
+        ),
       );
       // Go back to login screen
       Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'Failed to reset password'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(result['message'] ?? 'Đặt lại mật khẩu thất bại'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -84,7 +101,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           children: [
             const SizedBox(height: 20),
             const Text(
-              'Reset Password',
+              'Đặt lại mật khẩu',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -93,7 +110,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Please enter your new password.',
+              'Tạo mật khẩu mới an toàn cho tài khoản của bạn.',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -105,11 +122,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               controller: _passwordController,
               obscureText: !_showPassword,
               decoration: InputDecoration(
-                labelText: 'New Password',
+                labelText: 'Mật khẩu mới',
                 prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
                 suffixIcon: IconButton(
-                  icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                  onPressed: () => setState(() => _showPassword = !_showPassword),
+                  icon: Icon(
+                    _showPassword ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () =>
+                      setState(() => _showPassword = !_showPassword),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -125,7 +146,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               controller: _confirmPasswordController,
               obscureText: !_showPassword,
               decoration: InputDecoration(
-                labelText: 'Confirm New Password',
+                labelText: 'Xác nhận mật khẩu mới',
                 prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -145,13 +166,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _primaryColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  textStyle:
+                      const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   elevation: 2,
                 ),
-                child: _isLoading 
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white)) 
-                    : const Text('Reset Password'),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(color: Colors.white))
+                    : const Text('Đặt lại mật khẩu'),
               ),
             ),
           ],

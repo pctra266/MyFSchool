@@ -5,9 +5,14 @@ const Color _primaryColor = Color(0xFFBFA18E);
 const Color _backgroundColor = Color(0xFFF2F4F7);
 
 class OtpVerificationScreen extends StatefulWidget {
-  final String email;
+  final String? email;
+  final String? phoneNumber;
 
-  const OtpVerificationScreen({super.key, required this.email});
+  const OtpVerificationScreen({
+    super.key,
+    this.email,
+    this.phoneNumber,
+  });
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -16,20 +21,29 @@ class OtpVerificationScreen extends StatefulWidget {
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final _otpController = TextEditingController();
 
+  String get _displayTarget =>
+      widget.phoneNumber?.isNotEmpty == true ? widget.phoneNumber! : widget.email ?? '';
+
+  bool get _isPhone => widget.phoneNumber?.isNotEmpty == true;
+
   Future<void> _handleVerify() async {
     final otp = _otpController.text.trim();
     if (otp.isEmpty || otp.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid 6-digit OTP')),
+        const SnackBar(content: Text('Vui lòng nhập mã OTP 6 chữ số')),
       );
       return;
     }
 
-    // Move to Reset Password screen and pass along the email and OTP
+    // Move to Reset Password screen and pass along the identifier and OTP
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => ResetPasswordScreen(email: widget.email, otp: otp),
+        builder: (context) => ResetPasswordScreen(
+          email: widget.email,
+          phoneNumber: widget.phoneNumber,
+          otp: otp,
+        ),
       ),
     );
   }
@@ -59,7 +73,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           children: [
             const SizedBox(height: 20),
             const Text(
-              'OTP Verification',
+              'Xác minh OTP',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -67,12 +81,27 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              'Enter the verification code we just sent to your email address: \n${widget.email}',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                height: 1.5,
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+                children: [
+                  TextSpan(
+                    text: _isPhone
+                        ? 'Nhập mã OTP đã được gửi đến số điện thoại:\n'
+                        : 'Nhập mã OTP đã được gửi đến email:\n',
+                  ),
+                  TextSpan(
+                    text: _displayTarget,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1D2939),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 40),
@@ -80,9 +109,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               controller: _otpController,
               keyboardType: TextInputType.number,
               maxLength: 6,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 12,
+              ),
               decoration: InputDecoration(
-                labelText: 'OTP Code',
-                hintText: 'Enter 6-digit OTP',
+                labelText: 'Mã OTP',
+                hintText: '------',
+                hintStyle: const TextStyle(
+                  letterSpacing: 12,
+                  color: Colors.grey,
+                ),
                 prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -102,11 +141,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _primaryColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  textStyle:
+                      const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   elevation: 2,
                 ),
-                child: const Text('Verify'),
+                child: const Text('Xác nhận'),
               ),
             ),
           ],
