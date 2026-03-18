@@ -20,4 +20,9 @@ public class Attendance
     // Navigation properties
     [ForeignKey("StudentId")]
     public User? Student { get; set; }
+
+    public int TimetableId { get; set; }
+
+    [ForeignKey("TimetableId")]
+    public Timetable? Timetable { get; set; }
 }

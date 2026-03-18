@@ -102,6 +102,13 @@ public class MyFSchoolDbContext : DbContext
             .WithMany(u => u.Attendances)
             .HasForeignKey(a => a.StudentId);
 
+        // Configure Timetable -> Attendance
+        modelBuilder.Entity<Attendance>()
+            .HasOne(a => a.Timetable)
+            .WithMany()
+            .HasForeignKey(a => a.TimetableId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Configure User (Student) -> LeaveRequests
         modelBuilder.Entity<LeaveRequest>()
             .HasOne(lr => lr.Student)
@@ -156,7 +163,7 @@ public class MyFSchoolDbContext : DbContext
             .HasColumnType("date")
             .HasDefaultValueSql("CAST(GETDATE() AS DATE)");
         modelBuilder.Entity<Attendance>()
-            .HasIndex(a => new { a.StudentId, a.AttendanceDate })
+            .HasIndex(a => new { a.StudentId, a.AttendanceDate, a.TimetableId })
             .IsUnique();
         modelBuilder.Entity<Class>()
             .HasIndex(c => c.Name)

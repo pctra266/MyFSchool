@@ -44,12 +44,18 @@ public class AttendanceController : ControllerBase
         if (!int.TryParse(userIdStr, out var studentId)) return Unauthorized();
 
         var attendances = await _context.Attendance
+            .Include(a => a.Timetable)
+                .ThenInclude(t => t.Subject)
             .Where(a => a.StudentId == studentId && a.AttendanceDate.Year == year && a.AttendanceDate.Month == month)
             .OrderBy(a => a.AttendanceDate)
+            .ThenBy(a => a.Timetable!.StartTime)
             .Select(a => new
             {
                 Date = a.AttendanceDate,
-                Status = a.Status
+                Status = a.Status,
+                SubjectName = a.Timetable != null && a.Timetable.Subject != null ? a.Timetable.Subject.Name : "Unknown",
+                StartTime = a.Timetable != null ? a.Timetable.StartTime : TimeSpan.Zero,
+                EndTime = a.Timetable != null ? a.Timetable.EndTime : TimeSpan.Zero
             })
             .ToListAsync();
 

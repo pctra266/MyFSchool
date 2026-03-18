@@ -95,8 +95,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    _buildSummaryCard(),
-                    const SizedBox(height: 20),
                     _buildMonthHeader(),
                     const SizedBox(height: 12),
                     _buildCalendarGrid(),
@@ -106,54 +104,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStat('Present', '$_presentCount', Colors.green),
-          _buildStat('Absent', '$_absentCount', Colors.red),
-          _buildStat('Late', '$_lateCount', Colors.orange),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStat(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.grey,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 
@@ -177,12 +127,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     int firstDayWeekday = DateTime(_currentDate.year, _currentDate.month, 1).weekday;
     int offset = firstDayWeekday == 7 ? 0 : firstDayWeekday;
 
-    // Create a map to quickly look up attendance status by day
-    Map<int, String> dayStatusMap = {};
+    // Create a map to look up attendance records by day
+    Map<int, List<dynamic>> dayRecordsMap = {};
     for (var record in _monthlyData) {
       if (record['date'] != null && record['status'] != null) {
         DateTime parsedDate = DateTime.parse(record['date']);
-        dayStatusMap[parsedDate.day] = record['status'];
+        if (!dayRecordsMap.containsKey(parsedDate.day)) {
+          dayRecordsMap[parsedDate.day] = [];
+        }
+        dayRecordsMap[parsedDate.day]!.add(record);
       }
     }
 
@@ -203,7 +156,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         BoxDecoration? decoration;
         Color textColor = Colors.black87;
 
-        String? status = dayStatusMap[day];
+        List<dynamic>? records = dayRecordsMap[day];
+        String? status;
+
+        if (records != null && records.isNotEmpty) {
+          bool anyAbsent = records.any((r) => r['status'] == 'Absent');
+          bool anyLate = records.any((r) => r['status'] == 'Late');
+          if (anyAbsent) {
+            status = 'Absent';
+          } else if (anyLate) {
+            status = 'Late';
+          } else {
+            status = 'Present';
+          }
+        }
 
         if (status == 'Present') {
           decoration = const BoxDecoration(color: const Color(0xFFE8F5E9), shape: BoxShape.circle);
@@ -220,14 +186,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           textColor = Colors.grey;
         }
 
-        return Container(
-          decoration: decoration,
-          child: Center(
-            child: Text(
-              '$day',
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.w500,
+        return InkWell(
+          onTap: records == null || records.isEmpty
+              ? null
+              : () => _showDayDetails(context, day, records),
+          borderRadius: BorderRadius.circular(30),
+          child: Container(
+            decoration: decoration,
+            child: Center(
+              child: Text(
+                '$day',
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -258,6 +230,68 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         const SizedBox(width: 8),
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
+    );
+  }
+
+  void _showDayDetails(BuildContext context, int day, List<dynamic> records) {
+    String monthName = _months[_currentDate.month - 1];
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$monthName $day, ${_currentDate.year}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: records.length,
+                  itemBuilder: (context, index) {
+                    final record = records[index];
+                    final subject = record['subjectName'] ?? 'Unknown';
+                    final startTime = record['startTime'] ?? '';
+                    final endTime = record['endTime'] ?? '';
+                    final status = record['status'] ?? '';
+                    
+                    Color statusColor = Colors.grey;
+                    if (status == 'Present') statusColor = Colors.green;
+                    else if (status == 'Late') statusColor = Colors.orange;
+                    else if (status == 'Absent') statusColor = Colors.red;
+
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(subject, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text('$startTime - $endTime'),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: statusColor.withValues(alpha: 0.5)),
+                        ),
+                        child: Text(
+                          status,
+                          style: TextStyle(color: statusColor, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,4 +1,4 @@
-﻿--create database MyFSchool
+--create database MyFSchool
 -- 1. Bảng Users (Đã sửa tên cột và thêm các cột thiếu)
 
 CREATE TABLE Users (
@@ -88,9 +88,11 @@ CREATE TABLE Timetable (
 CREATE TABLE Attendance (
     Id INT PRIMARY KEY IDENTITY(1,1),
     StudentId INT,
+    TimetableId INT,
     AttendanceDate DATE,
     Status NVARCHAR(50),
-    FOREIGN KEY (StudentId) REFERENCES Users(Id)
+    FOREIGN KEY (StudentId) REFERENCES Users(Id),
+    FOREIGN KEY (TimetableId) REFERENCES Timetable(Id)
 );
 
 -- 8. Bảng LeaveRequests
