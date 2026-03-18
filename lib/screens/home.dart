@@ -68,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       {'icon': Icons.restaurant_menu, 'label': 'Meal plan', 'route': '/meal_plan'},
       {'icon': Icons.payments, 'label': 'Tuition', 'route': '/tuition'},
       {'icon': Icons.medical_services, 'label': 'Health records', 'route': '/health_records'},
+      {'icon': Icons.group, 'label': 'Clubs', 'route': '/clubs'},
     ];
 
     return Scaffold(

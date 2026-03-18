@@ -700,4 +700,162 @@ class ApiService {
       return {'success': false, 'message': 'Network error ($e). Please try again later.'};
     }
   }
+
+  // --- Clubs Methods ---
+  
+  Future<Map<String, dynamic>> getClubs() async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No authentication token found'};
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/Clubs'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'message': 'Failed to load clubs'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
+
+  Future<Map<String, dynamic>> getClubDetail(int id) async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No token'};
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/Clubs/$id'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        return {'success': false, 'message': 'Failed to load club detail'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
+
+  Future<Map<String, dynamic>> joinClub(int id) async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No token'};
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/Clubs/$id/join'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true};
+      } else {
+        String msg = 'Failed to join';
+        try { msg = jsonDecode(response.body)['message'] ?? msg; } catch(_) {}
+        return {'success': false, 'message': msg};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateClub(int id, String? desc, String? avatarUrl) async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No token'};
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/Clubs/$id'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        body: jsonEncode({'description': desc, 'avatarUrl': avatarUrl}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) return {'success': true};
+      return {'success': false, 'message': 'Failed to update club'};
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
+
+  Future<Map<String, dynamic>> manageClubMember(int clubId, int studentId, String action) async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No token'};
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/Clubs/$clubId/members/$studentId'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        body: jsonEncode({'action': action}),
+      );
+
+      if (response.statusCode == 200) return {'success': true};
+      String msg = 'Failed to manage member';
+      try { msg = jsonDecode(response.body)['message'] ?? msg; } catch(_) {}
+      return {'success': false, 'message': msg};
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
+
+  Future<Map<String, dynamic>> createClubEvent(int clubId, String title, String? desc, String? eventDate) async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No token'};
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/Clubs/$clubId/events'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        body: jsonEncode({'title': title, 'description': desc, 'eventDate': eventDate}),
+      );
+
+      if (response.statusCode == 200) return {'success': true, 'data': jsonDecode(response.body)};
+      String msg = 'Failed to create event';
+      try { msg = jsonDecode(response.body)['message'] ?? msg; } catch(_) {}
+      return {'success': false, 'message': msg};
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateClubEvent(int clubId, int eventId, String? title, String? desc, String? eventDate) async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No token'};
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/Clubs/$clubId/events/$eventId'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        body: jsonEncode({'title': title, 'description': desc, 'eventDate': eventDate}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) return {'success': true};
+      return {'success': false, 'message': 'Failed to update event'};
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteClubEvent(int clubId, int eventId) async {
+    try {
+      final token = await getToken();
+      if (token == null) return {'success': false, 'message': 'No token'};
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/api/Clubs/$clubId/events/$eventId'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) return {'success': true};
+      return {'success': false, 'message': 'Failed to delete event'};
+    } catch (e) {
+      return {'success': false, 'message': 'Network error ($e)'};
+    }
+  }
 }
