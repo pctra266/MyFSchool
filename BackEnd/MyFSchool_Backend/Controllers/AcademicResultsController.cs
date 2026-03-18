@@ -28,12 +28,14 @@ public class AcademicResultsController : ControllerBase
             .Include(ar => ar.Subject)
                 .ThenInclude(s => s!.Teacher)
             .Where(ar => ar.StudentId == studentId)
-            .OrderBy(ar => ar.Semester)
+            .OrderBy(ar => ar.GradeLevel)
+            .ThenBy(ar => ar.Semester)
             .Select(ar => new
             {
                 ar.Id,
                 SubjectName = ar.Subject!.Name,
                 TeacherName = ar.Subject.Teacher != null ? ar.Subject.Teacher.FullName : "Unknown",
+                ar.GradeLevel,
                 ar.Semester,
                 ar.AssessmentName,
                 ar.Score

@@ -62,6 +62,7 @@ CREATE TABLE AcademicResults (
     Id INT PRIMARY KEY IDENTITY(1,1),
     StudentId INT,
     SubjectId INT,
+    GradeLevel INT NOT NULL DEFAULT 10, -- Khối lớp: 10, 11, 12
     Semester INT,
     AssessmentName NVARCHAR(100),
     Score DECIMAL(4, 2),

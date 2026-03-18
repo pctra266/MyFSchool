@@ -13,6 +13,9 @@ public class AcademicResult
     public int SubjectId { get; set; }
 
     [Required]
+    public int GradeLevel { get; set; } = 10;
+
+    [Required]
     public int Semester { get; set; }
 
     [Required]

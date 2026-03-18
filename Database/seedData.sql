@@ -115,54 +115,124 @@ INSERT INTO Subjects (Name, TeacherId) VALUES
 (N'Lịch sử',      26), -- Cô Khai
 (N'Kinh tế & Pháp luật', 27); -- Thầy Huệ
 
--- 5. Academic Results (Học kỳ 1: Sep–Dec 2025 | Học kỳ 2: Jan–Jun 2026)
--- Alice (Id=1)
-INSERT INTO AcademicResults (StudentId, SubjectId, Semester, AssessmentName, Score) VALUES
--- Học kỳ 1
-(1, 1, 1, N'Kiểm tra 15 phút', 9.0),
-(1, 1, 1, N'Kiểm tra giữa kỳ', 9.5),
-(1, 1, 1, N'Thi cuối kỳ',      9.8),
-(1, 2, 1, N'Kiểm tra 15 phút', 8.5),
-(1, 2, 1, N'Kiểm tra giữa kỳ', 9.0),
-(1, 2, 1, N'Thi cuối kỳ',      8.5),
-(1, 3, 1, N'Kiểm tra 15 phút', 8.0),
-(1, 3, 1, N'Kiểm tra giữa kỳ', 8.5),
-(1, 3, 1, N'Thi cuối kỳ',      9.0),
-(1, 5, 1, N'Kiểm tra 15 phút', 9.5),
-(1, 5, 1, N'Kiểm tra giữa kỳ', 9.0),
-(1, 5, 1, N'Thi cuối kỳ',      9.2),
+-- 5. Academic Results (Khối 10: 2023-2024 | Khối 11: 2024-2025 | Khối 12: 2025-2026)
+-- Alice (Id=1) - Khối 10
+INSERT INTO AcademicResults (StudentId, SubjectId, GradeLevel, Semester, AssessmentName, Score) VALUES
+-- === LỚP 10 - HỌC KỲ 1 ===
+(1, 1, 10, 1, N'Kiểm tra 15 phút', 9.0),
+(1, 1, 10, 1, N'Kiểm tra giữa kỳ', 9.5),
+(1, 1, 10, 1, N'Thi cuối kỳ',      9.8),
+(1, 2, 10, 1, N'Kiểm tra 15 phút', 8.5),
+(1, 2, 10, 1, N'Kiểm tra giữa kỳ', 9.0),
+(1, 2, 10, 1, N'Thi cuối kỳ',      8.5),
+(1, 3, 10, 1, N'Kiểm tra 15 phút', 8.0),
+(1, 3, 10, 1, N'Kiểm tra giữa kỳ', 8.5),
+(1, 3, 10, 1, N'Thi cuối kỳ',      9.0),
+(1, 5, 10, 1, N'Kiểm tra 15 phút', 9.5),
+(1, 5, 10, 1, N'Kiểm tra giữa kỳ', 9.0),
+(1, 5, 10, 1, N'Thi cuối kỳ',      9.2),
 
--- Alice (Id=1) Học kỳ 2
-(1, 1, 2, N'Kiểm tra 15 phút', 8.5),
-(1, 1, 2, N'Kiểm tra giữa kỳ', 8.5),
-(1, 1, 2, N'Thi cuối kỳ',      9.0),
-(1, 2, 2, N'Kiểm tra 15 phút', 8.0),
-(1, 2, 2, N'Kiểm tra giữa kỳ', 8.5),
-(1, 2, 2, N'Thi cuối kỳ',      8.5),
-(1, 3, 2, N'Kiểm tra 15 phút', 9.0),
-(1, 3, 2, N'Kiểm tra giữa kỳ', 8.5),
-(1, 3, 2, N'Thi cuối kỳ',      8.8),
-(1, 5, 2, N'Kiểm tra 15 phút', 9.5),
-(1, 5, 2, N'Kiểm tra giữa kỳ', 9.0),
-(1, 5, 2, N'Thi cuối kỳ',      9.5),
+-- === LỚP 10 - HỌC KỲ 2 ===
+(1, 1, 10, 2, N'Kiểm tra 15 phút', 8.5),
+(1, 1, 10, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 1, 10, 2, N'Thi cuối kỳ',      9.0),
+(1, 2, 10, 2, N'Kiểm tra 15 phút', 8.0),
+(1, 2, 10, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 2, 10, 2, N'Thi cuối kỳ',      8.5),
+(1, 3, 10, 2, N'Kiểm tra 15 phút', 9.0),
+(1, 3, 10, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 3, 10, 2, N'Thi cuối kỳ',      8.8),
+(1, 5, 10, 2, N'Kiểm tra 15 phút', 9.5),
+(1, 5, 10, 2, N'Kiểm tra giữa kỳ', 9.0),
+(1, 5, 10, 2, N'Thi cuối kỳ',      9.5),
 
--- Minh Khoa (Id=2) Học kỳ 2
--- Môn Toán (SubjectId: 1)
-(2, 1, 2, N'Kiểm tra 15 phút', 8.0),
-(2, 1, 2, N'Kiểm tra giữa kỳ', 7.5),
-(2, 1, 2, N'Thi cuối kỳ',      8.5),
--- Môn Vật lý (SubjectId: 2)
-(2, 2, 2, N'Kiểm tra 15 phút', 7.0),
-(2, 2, 2, N'Kiểm tra giữa kỳ', 8.0),
-(2, 2, 2, N'Thi cuối kỳ',      7.5),
--- Môn Ngữ văn (SubjectId: 3)
-(2, 3, 2, N'Kiểm tra 15 phút', 8.5),
-(2, 3, 2, N'Kiểm tra giữa kỳ', 8.5),
-(2, 3, 2, N'Thi cuối kỳ',      8.0),
--- Môn Tiếng Anh (SubjectId: 5)
-(2, 5, 2, N'Kiểm tra 15 phút', 9.0),
-(2, 5, 2, N'Kiểm tra giữa kỳ', 8.8),
-(2, 5, 2, N'Thi cuối kỳ',      9.2);
+-- === LỚP 11 - HỌC KỲ 1 ===
+(1, 1, 11, 1, N'Kiểm tra 15 phút', 8.0),
+(1, 1, 11, 1, N'Kiểm tra giữa kỳ', 8.5),
+(1, 1, 11, 1, N'Thi cuối kỳ',      9.0),
+(1, 2, 11, 1, N'Kiểm tra 15 phút', 7.5),
+(1, 2, 11, 1, N'Kiểm tra giữa kỳ', 8.0),
+(1, 2, 11, 1, N'Thi cuối kỳ',      8.5),
+(1, 3, 11, 1, N'Kiểm tra 15 phút', 9.0),
+(1, 3, 11, 1, N'Kiểm tra giữa kỳ', 9.5),
+(1, 3, 11, 1, N'Thi cuối kỳ',      9.0),
+(1, 5, 11, 1, N'Kiểm tra 15 phút', 9.0),
+(1, 5, 11, 1, N'Kiểm tra giữa kỳ', 9.5),
+(1, 5, 11, 1, N'Thi cuối kỳ',      9.8),
+(1, 6, 11, 1, N'Kiểm tra 15 phút', 8.0),
+(1, 6, 11, 1, N'Kiểm tra giữa kỳ', 8.5),
+(1, 6, 11, 1, N'Thi cuối kỳ',      8.0),
+
+-- === LỚP 11 - HỌC KỲ 2 ===
+(1, 1, 11, 2, N'Kiểm tra 15 phút', 9.0),
+(1, 1, 11, 2, N'Kiểm tra giữa kỳ', 9.0),
+(1, 1, 11, 2, N'Thi cuối kỳ',      9.5),
+(1, 2, 11, 2, N'Kiểm tra 15 phút', 8.5),
+(1, 2, 11, 2, N'Kiểm tra giữa kỳ', 8.0),
+(1, 2, 11, 2, N'Thi cuối kỳ',      8.5),
+(1, 3, 11, 2, N'Kiểm tra 15 phút', 8.5),
+(1, 3, 11, 2, N'Kiểm tra giữa kỳ', 9.0),
+(1, 3, 11, 2, N'Thi cuối kỳ',      8.8),
+(1, 5, 11, 2, N'Kiểm tra 15 phút', 9.5),
+(1, 5, 11, 2, N'Kiểm tra giữa kỳ', 9.8),
+(1, 5, 11, 2, N'Thi cuối kỳ',      10.0),
+(1, 6, 11, 2, N'Kiểm tra 15 phút', 7.5),
+(1, 6, 11, 2, N'Kiểm tra giữa kỳ', 8.0),
+(1, 6, 11, 2, N'Thi cuối kỳ',      8.5),
+
+-- === LỚP 12 - HỌC KỲ 1 ===
+(1, 1, 12, 1, N'Kiểm tra 15 phút', 9.5),
+(1, 1, 12, 1, N'Kiểm tra giữa kỳ', 9.5),
+(1, 1, 12, 1, N'Thi cuối kỳ',      10.0),
+(1, 2, 12, 1, N'Kiểm tra 15 phút', 8.0),
+(1, 2, 12, 1, N'Kiểm tra giữa kỳ', 8.5),
+(1, 2, 12, 1, N'Thi cuối kỳ',      9.0),
+(1, 3, 12, 1, N'Kiểm tra 15 phút', 9.5),
+(1, 3, 12, 1, N'Kiểm tra giữa kỳ', 9.0),
+(1, 3, 12, 1, N'Thi cuối kỳ',      9.5),
+(1, 5, 12, 1, N'Kiểm tra 15 phút', 10.0),
+(1, 5, 12, 1, N'Kiểm tra giữa kỳ', 9.5),
+(1, 5, 12, 1, N'Thi cuối kỳ',      9.8),
+(1, 6, 12, 1, N'Kiểm tra 15 phút', 8.5),
+(1, 6, 12, 1, N'Kiểm tra giữa kỳ', 9.0),
+(1, 6, 12, 1, N'Thi cuối kỳ',      8.5),
+(1, 7, 12, 1, N'Kiểm tra 15 phút', 8.0),
+(1, 7, 12, 1, N'Kiểm tra giữa kỳ', 8.5),
+(1, 7, 12, 1, N'Thi cuối kỳ',      9.0),
+
+-- === LỚP 12 - HỌC KỲ 2 ===
+(1, 1, 12, 2, N'Kiểm tra 15 phút', 8.5),
+(1, 1, 12, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 1, 12, 2, N'Thi cuối kỳ',      9.0),
+(1, 2, 12, 2, N'Kiểm tra 15 phút', 8.0),
+(1, 2, 12, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 2, 12, 2, N'Thi cuối kỳ',      8.5),
+(1, 3, 12, 2, N'Kiểm tra 15 phút', 9.0),
+(1, 3, 12, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 3, 12, 2, N'Thi cuối kỳ',      8.8),
+(1, 5, 12, 2, N'Kiểm tra 15 phút', 9.5),
+(1, 5, 12, 2, N'Kiểm tra giữa kỳ', 9.0),
+(1, 5, 12, 2, N'Thi cuối kỳ',      9.5),
+(1, 6, 12, 2, N'Kiểm tra 15 phút', 9.0),
+(1, 6, 12, 2, N'Kiểm tra giữa kỳ', 9.5),
+(1, 6, 12, 2, N'Thi cuối kỳ',      9.0),
+(1, 7, 12, 2, N'Kiểm tra 15 phút', 8.5),
+(1, 7, 12, 2, N'Kiểm tra giữa kỳ', 9.0),
+(1, 7, 12, 2, N'Thi cuối kỳ',      8.8),
+
+-- Minh Khoa (Id=2) - Khối 10 - HK2
+(2, 1, 10, 2, N'Kiểm tra 15 phút', 8.0),
+(2, 1, 10, 2, N'Kiểm tra giữa kỳ', 7.5),
+(2, 1, 10, 2, N'Thi cuối kỳ',      8.5),
+(2, 2, 10, 2, N'Kiểm tra 15 phút', 7.0),
+(2, 2, 10, 2, N'Kiểm tra giữa kỳ', 8.0),
+(2, 2, 10, 2, N'Thi cuối kỳ',      7.5),
+(2, 3, 10, 2, N'Kiểm tra 15 phút', 8.5),
+(2, 3, 10, 2, N'Kiểm tra giữa kỳ', 8.5),
+(2, 3, 10, 2, N'Thi cuối kỳ',      8.0),
+(2, 5, 10, 2, N'Kiểm tra 15 phút', 9.0),
+(2, 5, 10, 2, N'Kiểm tra giữa kỳ', 8.8),
+(2, 5, 10, 2, N'Thi cuối kỳ',      9.2);
 
 -- 6. Timetable (Thời khóa biểu lớp 10A1)
 INSERT INTO Timetable (ClassId, SubjectId, TeacherId, Room, DayOfWeek, StartTime, EndTime) VALUES

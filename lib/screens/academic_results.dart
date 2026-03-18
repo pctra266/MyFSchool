@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
@@ -13,18 +12,34 @@ class AcademicResultsScreen extends StatefulWidget {
   State<AcademicResultsScreen> createState() => _AcademicResultsScreenState();
 }
 
-class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
+class _AcademicResultsScreenState extends State<AcademicResultsScreen>
+    with SingleTickerProviderStateMixin {
+  int _selectedGrade = 10;
   int _selectedSemester = 1;
 
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   String? _errorMessage;
   List<dynamic> _allResults = [];
-  
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeIn);
     _fetchResults();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchResults() async {
@@ -32,6 +47,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
       _isLoading = true;
       _errorMessage = null;
     });
+    _fadeController.reset();
 
     final response = await _apiService.getAcademicResults();
     if (mounted) {
@@ -40,6 +56,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
           _allResults = response['data'] ?? [];
           _isLoading = false;
         });
+        _fadeController.forward();
       } else {
         setState(() {
           _errorMessage = response['message'] ?? 'Failed to load data';
@@ -49,109 +66,38 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _backgroundColor,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('Academic Transcript'),
-        backgroundColor: _primaryColor,
-        foregroundColor: _textColor,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
-              : SafeArea(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 24),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSemesterSelector(),
-                              const SizedBox(height: 16),
-                              _buildSubjectList(),
-                              const SizedBox(height: 40),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-    );
+  void _selectGrade(int grade) {
+    setState(() {
+      _selectedGrade = grade;
+      _selectedSemester = 1;
+    });
+    _fadeController.reset();
+    _fadeController.forward();
   }
 
-  Widget _buildSemesterSelector() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildSemesterButton('Semester 1', 1),
-          _buildSemesterButton('Semester 2', 2),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSemesterButton(String title, int index) {
-    final isSelected = _selectedSemester == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedSemester = index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? _primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.grey,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  void _selectSemester(int semester) {
+    setState(() => _selectedSemester = semester);
+    _fadeController.reset();
+    _fadeController.forward();
   }
 
   List<Map<String, dynamic>> _getFilteredSubjects() {
-    final semesterResults = _allResults.where((r) => r['semester'] == _selectedSemester).toList();
-    
+    final filtered = _allResults.where((r) {
+      final grade = (r['gradeLevel'] as num?)?.toInt() ?? 10;
+      final semester = (r['semester'] as num?)?.toInt() ?? 1;
+      return grade == _selectedGrade && semester == _selectedSemester;
+    }).toList();
+
     final Map<String, Map<String, dynamic>> subjectMap = {};
-    for (var r in semesterResults) {
+    for (var r in filtered) {
       final subjectName = r['subjectName']?.toString() ?? 'Unknown';
-      var teacherName = r['teacherName']?.toString() ?? 'Unknown';
-      
+      final teacherName = r['teacherName']?.toString() ?? 'Unknown';
       final assessmentName = r['assessmentName']?.toString() ?? 'Test';
       final scoreVal = r['score'];
-      final score = (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
-      
+      final score = (scoreVal is int)
+          ? scoreVal.toDouble()
+          : (scoreVal as double? ?? 0.0);
+
       if (!subjectMap.containsKey(subjectName)) {
         subjectMap[subjectName] = {
           'name': subjectName,
@@ -159,13 +105,12 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
           'components': <Map<String, dynamic>>[],
         };
       }
-      
       (subjectMap[subjectName]!['components'] as List).add({
         'name': assessmentName,
         'score': score,
       });
     }
-    
+
     final List<Map<String, dynamic>> finalSubjects = [];
     for (var subject in subjectMap.values) {
       final components = subject['components'] as List;
@@ -177,24 +122,281 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
       subject['avg'] = double.parse(avg.toStringAsFixed(1));
       finalSubjects.add(subject);
     }
-    
+
     return finalSubjects;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _backgroundColor,
+      appBar: AppBar(
+        title: const Text('Bảng điểm học sinh'),
+        backgroundColor: _primaryColor,
+        foregroundColor: _textColor,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Text(_errorMessage!,
+                      style: const TextStyle(color: Colors.red)))
+              : SafeArea(
+                  child: Column(
+                    children: [
+                      _buildHeaderBanner(),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              _buildGradeSelector(),
+                              const SizedBox(height: 12),
+                              _buildSemesterSelector(),
+                              const SizedBox(height: 20),
+                              _buildSubjectList(),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+    );
+  }
+
+  Widget _buildHeaderBanner() {
+    final yearMap = {
+      10: '2023 – 2024',
+      11: '2024 – 2025',
+      12: '2025 – 2026',
+    };
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [_primaryColor, _primaryColor.withValues(alpha: 0.75)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'Lớp $_selectedGrade',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Năm học ${yearMap[_selectedGrade]}',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 13,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            'HK $_selectedSemester',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGradeSelector() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Text(
+              'Chọn khối lớp',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[500],
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+            child: Row(
+              children: [10, 11, 12]
+                  .map((g) => Expanded(child: _buildGradeChip(g)))
+                  .toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGradeChip(int grade) {
+    final isSelected = _selectedGrade == grade;
+    return GestureDetector(
+      onTap: () => _selectGrade(grade),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? _primaryColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(
+              'Lớp $grade',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isSelected ? Colors.white : Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              _gradeYearLabel(grade),
+              style: TextStyle(
+                fontSize: 10,
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.85)
+                    : Colors.grey[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _gradeYearLabel(int grade) {
+    const labels = {10: '2023-2024', 11: '2024-2025', 12: '2025-2026'};
+    return labels[grade] ?? '';
+  }
+
+  Widget _buildSemesterSelector() {
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _buildSemesterButton('Học kỳ 1', 1),
+          _buildSemesterButton('Học kỳ 2', 2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSemesterButton(String title, int index) {
+    final isSelected = _selectedSemester == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _selectSemester(index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(vertical: 11),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? _primaryColor.withValues(alpha: 0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: isSelected
+                ? Border.all(color: _primaryColor, width: 1.5)
+                : null,
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: isSelected ? _primaryColor : Colors.grey[500],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildSubjectList() {
     final subjects = _getFilteredSubjects();
 
     if (subjects.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: Text('No academic results found for this semester.', style: TextStyle(color: Colors.grey)),
+      return FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          margin: const EdgeInsets.only(top: 16),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.school_outlined, size: 48, color: Colors.grey[300]),
+              const SizedBox(height: 12),
+              Text(
+                'Chưa có kết quả học tập\ncho lớp $_selectedGrade - Học kỳ $_selectedSemester',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[500], fontSize: 14),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return Column(
-      children: subjects.map((sub) => _SubjectCard(data: sub)).toList(),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Column(
+        children: subjects.map((sub) => _SubjectCard(data: sub)).toList(),
+      ),
     );
   }
 }
@@ -211,12 +413,30 @@ class _SubjectCard extends StatelessWidget {
     final double avg = data['avg'];
     final List<Map<String, dynamic>> components = data['components'];
 
-    Color scoreColor = avg >= 9.0
-        ? const Color(0xFF4CAF50) // Green
-        : (avg >= 8.0 ? const Color(0xFF2196F3) : const Color(0xFFFF9800)); // Blue / Orange
+    Color scoreColor;
+    if (avg >= 9.0) {
+      scoreColor = const Color(0xFF4CAF50);
+    } else if (avg >= 8.0) {
+      scoreColor = const Color(0xFF2196F3);
+    } else if (avg >= 6.5) {
+      scoreColor = const Color(0xFFFF9800);
+    } else {
+      scoreColor = const Color(0xFFF44336);
+    }
+
+    String grade;
+    if (avg >= 9.0) {
+      grade = 'Xuất sắc';
+    } else if (avg >= 8.0) {
+      grade = 'Giỏi';
+    } else if (avg >= 6.5) {
+      grade = 'Khá';
+    } else {
+      grade = 'TB';
+    }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -231,12 +451,12 @@ class _SubjectCard extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          tilePadding: const EdgeInsets.all(16),
+          tilePadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           leading: Container(
-            width: 50,
-            height: 50,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: scoreColor.withValues(alpha: 0.1),
+              color: scoreColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -252,37 +472,55 @@ class _SubjectCard extends StatelessWidget {
           ),
           title: Text(
             name,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 15,
               color: _textColor,
             ),
           ),
           subtitle: Text(
             teacher,
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
           ),
-          trailing: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: scoreColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                avg.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: scoreColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  avg.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(height: 3),
+              Text(
+                grade,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: scoreColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Column(
                 children: components.map<Widget>((comp) {
                   return Padding(
@@ -293,7 +531,8 @@ class _SubjectCard extends StatelessWidget {
                           flex: 3,
                           child: Text(
                             comp['name'],
-                            style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                            style: TextStyle(
+                                color: Colors.grey[700], fontSize: 13),
                           ),
                         ),
                         Expanded(
@@ -302,18 +541,24 @@ class _SubjectCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: (comp['score'] as double) / 10.0,
-                              backgroundColor: Colors.grey[100],
-                              valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
+                              backgroundColor: Colors.grey[200],
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(scoreColor),
                               minHeight: 6,
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          comp['score'].toString(),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _textColor,
+                        SizedBox(
+                          width: 36,
+                          child: Text(
+                            comp['score'].toString(),
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _textColor,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],
