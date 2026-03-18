@@ -90,7 +90,7 @@ public class ClubsController : ControllerBase
         {
             ClubId = id,
             StudentId = userId,
-            Role = "Member",
+            Role = "Pending",
             JoinedDate = DateTime.Now
         };
 
@@ -134,9 +134,13 @@ public class ClubsController : ControllerBase
         var member = await _context.ClubMembers.FirstOrDefaultAsync(m => m.ClubId == id && m.StudentId == studentId);
         if (member == null) return NotFound(new { message = "Member not found in this club" });
 
-        if (dto.Action == "Kick")
+        if (dto.Action == "Kick" || dto.Action == "Reject")
         {
             _context.ClubMembers.Remove(member);
+        }
+        else if (dto.Action == "Approve")
+        {
+            member.Role = "Member";
         }
         else if (dto.Action == "Promote")
         {
@@ -149,7 +153,7 @@ public class ClubsController : ControllerBase
         }
         else
         {
-            return BadRequest(new { message = "Invalid action. Use Kick, Promote, Demote." });
+            return BadRequest(new { message = "Invalid action." });
         }
 
         await _context.SaveChangesAsync();

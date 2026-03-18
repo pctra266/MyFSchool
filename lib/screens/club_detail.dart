@@ -19,6 +19,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> with SingleTickerPr
   int? _currentUserId;
   bool _isLeader = false;
   bool _isMember = false;
+  bool _isPending = false;
 
   late TabController _tabController;
 
@@ -75,14 +76,19 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> with SingleTickerPr
   void _checkRoles(Map<String, dynamic> data) {
     _isMember = false;
     _isLeader = false;
+    _isPending = false;
     if (_currentUserId == null) return;
     
     final members = data['members'] as List<dynamic>? ?? [];
     for (var m in members) {
       if (m['studentId'] == _currentUserId) {
-        _isMember = true;
-        if (m['role'] == 'Leader') {
-          _isLeader = true;
+        if (m['role'] == 'Pending') {
+          _isPending = true;
+        } else {
+          _isMember = true;
+          if (m['role'] == 'Leader') {
+            _isLeader = true;
+          }
         }
         break;
       }
@@ -103,42 +109,194 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> with SingleTickerPr
   Future<void> _createEvent() async {
     final titleController = TextEditingController();
     final descController = TextEditingController();
-    final dateController = TextEditingController(); // Simple YYYY-MM-DD for demo
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
 
-    await showDialog(
+    const Color textColor = Color(0xFF1D2939);
+
+    await showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('New Event'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
-            TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
-            TextField(controller: dateController, decoration: const InputDecoration(labelText: 'Date (YYYY-MM-DD)')),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final res = await ApiService().createClubEvent(
-                _clubId!,
-                titleController.text,
-                descController.text,
-                dateController.text.isNotEmpty ? dateController.text : null,
-              );
-              if (res['success']) {
-                _fetchData();
-              } else {
-                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'])));
-              }
-            },
-            child: const Text('Create'),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 20,
+              right: 20,
+              top: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Create New Event',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _primaryColor),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Event Title',
+                      prefixIcon: const Icon(Icons.title, color: _primaryColor),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: descController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      alignLabelWithHint: true,
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.only(bottom: 30),
+                        child: Icon(Icons.description, color: _primaryColor),
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(2030),
+                            );
+                            if (date != null) {
+                              setModalState(() => selectedDate = date);
+                            }
+                          },
+                          icon: const Icon(Icons.calendar_today, color: _primaryColor),
+                          label: Text(
+                            selectedDate == null ? 'Select Date' : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+                            style: const TextStyle(color: textColor),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                            if (time != null) {
+                              setModalState(() => selectedTime = time);
+                            }
+                          },
+                          icon: const Icon(Icons.access_time, color: _primaryColor),
+                          label: Text(
+                            selectedTime == null ? 'Select Time' : selectedTime!.format(context),
+                            style: const TextStyle(color: textColor),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (titleController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter event title')));
+                          return;
+                        }
+                        
+                        String? isoDate;
+                        if (selectedDate != null) {
+                          var finalDt = selectedDate!;
+                          if (selectedTime != null) {
+                            finalDt = DateTime(finalDt.year, finalDt.month, finalDt.day, selectedTime!.hour, selectedTime!.minute);
+                          }
+                          isoDate = finalDt.toIso8601String();
+                        }
+
+                        Navigator.pop(ctx);
+                        final res = await ApiService().createClubEvent(
+                          _clubId!,
+                          titleController.text,
+                          descController.text,
+                          isoDate,
+                        );
+                        if (res['success']) {
+                          _fetchData();
+                        } else {
+                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'])));
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Create Event', style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
+  }
+
+  Future<void> _confirmAndManageMemberAction(int studentId, String studentName, String action) async {
+    if (action == 'Kick') {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Confirm Removal'),
+          content: Text('Are you sure you want to remove $studentName from the club?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+      );
+      if (confirm != true) return;
+    }
+    _manageMemberAction(studentId, action);
   }
 
   Future<void> _manageMemberAction(int studentId, String action) async {
@@ -197,7 +355,13 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> with SingleTickerPr
                 const SizedBox(height: 8),
                 Text(_club!['description'] ?? '', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[700])),
                 const SizedBox(height: 16),
-                if (!_isMember)
+                if (_isPending)
+                  Chip(
+                    label: const Text('Pending Approval'),
+                    backgroundColor: Colors.orange.withValues(alpha: 0.1),
+                    labelStyle: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                  )
+                else if (!_isMember)
                   ElevatedButton(
                     onPressed: _joinClub,
                     style: ElevatedButton.styleFrom(backgroundColor: _primaryColor),
@@ -273,14 +437,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> with SingleTickerPr
                           child: const Icon(Icons.person, color: _primaryColor),
                         ),
                         title: Text(m['studentName'] ?? 'Unknown'),
-                        subtitle: Text(m['role'] ?? 'Member', style: TextStyle(color: m['role'] == 'Leader' ? Colors.orange : Colors.grey)),
+                        subtitle: Text(m['role'] ?? 'Member', style: TextStyle(color: m['role'] == 'Leader' ? Colors.orange : (m['role'] == 'Pending' ? Colors.grey : Colors.green))),
                         trailing: _isLeader && !isMe
                             ? PopupMenuButton<String>(
-                                onSelected: (val) => _manageMemberAction(m['studentId'], val),
+                                onSelected: (val) => _confirmAndManageMemberAction(m['studentId'], m['studentName'] ?? 'Unknown', val),
                                 itemBuilder: (context) => [
+                                  if (m['role'] == 'Pending') const PopupMenuItem(value: 'Approve', child: Text('Approve Join Request')),
+                                  if (m['role'] == 'Pending') const PopupMenuItem(value: 'Reject', child: Text('Reject Request')),
                                   if (m['role'] == 'Member') const PopupMenuItem(value: 'Promote', child: Text('Promote to Leader')),
                                   if (m['role'] == 'Leader') const PopupMenuItem(value: 'Demote', child: Text('Demote to Member')),
-                                  const PopupMenuItem(value: 'Kick', child: Text('Remove from Club')),
+                                  if (m['role'] != 'Pending') const PopupMenuItem(value: 'Kick', child: Text('Remove from Club')),
                                 ],
                               )
                             : null,
