@@ -141,7 +141,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
   }
 
   List<Map<String, dynamic>> _getFilteredSubjects() {
-    final semesterResults = _allResults.where((r) => r['semester']?.toString() == _selectedSemester.toString()).toList();
+    final semesterResults = _allResults.where((r) => r['semester'] == _selectedSemester).toList();
     
     final Map<String, Map<String, dynamic>> subjectMap = {};
     for (var r in semesterResults) {

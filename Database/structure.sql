@@ -6,7 +6,7 @@ CREATE TABLE Users (
     FullName NVARCHAR(255),
     Email NVARCHAR(255),
     PasswordHash NVARCHAR(MAX),
-    FocusArea NVARCHAR(255),
+    FocusArea NVARCHAR(255), 
     DateOfBirth DATE,
     Gender NVARCHAR(10),
     Address NVARCHAR(MAX),

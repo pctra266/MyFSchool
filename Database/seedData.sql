@@ -131,7 +131,22 @@ INSERT INTO AcademicResults (StudentId, SubjectId, Semester, AssessmentName, Sco
 (1, 5, 1, N'Kiểm tra 15 phút', 9.5),
 (1, 5, 1, N'Kiểm tra giữa kỳ', 9.0),
 (1, 5, 1, N'Thi cuối kỳ',      9.2),
--- Học kỳ 2 (đang diễn ra - đã có điểm 15 phút và giữa kỳ)
+
+-- Alice (Id=1) Học kỳ 2
+(1, 1, 2, N'Kiểm tra 15 phút', 8.5),
+(1, 1, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 1, 2, N'Thi cuối kỳ',      9.0),
+(1, 2, 2, N'Kiểm tra 15 phút', 8.0),
+(1, 2, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 2, 2, N'Thi cuối kỳ',      8.5),
+(1, 3, 2, N'Kiểm tra 15 phút', 9.0),
+(1, 3, 2, N'Kiểm tra giữa kỳ', 8.5),
+(1, 3, 2, N'Thi cuối kỳ',      8.8),
+(1, 5, 2, N'Kiểm tra 15 phút', 9.5),
+(1, 5, 2, N'Kiểm tra giữa kỳ', 9.0),
+(1, 5, 2, N'Thi cuối kỳ',      9.5),
+
+-- Minh Khoa (Id=2) Học kỳ 2
 -- Môn Toán (SubjectId: 1)
 (2, 1, 2, N'Kiểm tra 15 phút', 8.0),
 (2, 1, 2, N'Kiểm tra giữa kỳ', 7.5),
