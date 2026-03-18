@@ -334,3 +334,20 @@ INSERT INTO Notifications (UserId, Title, Description, IsRead, CreatedAt) VALUES
 (1, N' Đội tuyển Toán cấp thành phố',
    N'Em Alice đã được chọn vào đội tuyển Toán của trường, dự thi cấp thành phố vào tháng 4/2026. Lịch tập luyện sẽ được thông báo sau.',
    0, '2026-03-10 08:00:00');
+
+-- 16. Clubs
+INSERT INTO Clubs (Name, Description, AvatarUrl, EstablishedDate, CreatedAt) VALUES
+(N'Câu lạc bộ Âm nhạc', N'Nơi giao lưu của các bạn yêu âm nhạc', 'https://picsum.photos/600/300?music', '2025-01-10', '2025-01-10 08:00:00'),
+(N'Câu lạc bộ Tin học', N'Học hỏi lập trình và công nghệ mới', 'https://picsum.photos/600/300?computer', '2025-02-15', '2025-02-15 09:00:00');
+
+-- 17. ClubMembers (Giả sử Alice là Leader CLB Âm nhạc, Minh Khoa là Member)
+INSERT INTO ClubMembers (ClubId, StudentId, Role, JoinedDate) VALUES
+(1, 1, 'Leader', '2025-09-01 08:00:00'), -- Alice (Id=1) là Leader CLB Âm nhạc
+(1, 2, 'Member', '2025-09-05 08:00:00'), -- Minh Khoa (Id=2) là Member CLB Âm nhạc
+(2, 2, 'Leader', '2025-09-10 08:00:00'); -- Minh Khoa (Id=2) là Leader CLB Tin học
+
+-- 18. ClubEvents
+INSERT INTO ClubEvents (ClubId, Title, Description, EventDate, CreatedAt) VALUES
+(1, N'Giao lưu âm nhạc chào đón năm mới', N'Buổi biểu diễn âm nhạc tại hội trường', '2026-01-15 18:00:00', '2026-01-01 08:00:00'),
+(1, N'Buổi tập ban nhạc hàng tuần', N'Tập luyện cho các tiết mục sắp tới', '2026-03-25 15:00:00', '2026-03-20 08:00:00'),
+(2, N'Cuộc thi lập trình Hackathon nội bộ', N'Cuộc thi viết code nhanh kỉ niệm ngày thành lập', '2026-04-10 08:00:00', '2026-03-10 08:00:00');

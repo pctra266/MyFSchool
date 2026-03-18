@@ -183,3 +183,35 @@ CREATE TABLE Notifications (
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (UserId) REFERENCES Users(Id)
 );
+
+-- 16. Bảng Clubs
+CREATE TABLE Clubs (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX),
+    AvatarUrl NVARCHAR(MAX),
+    EstablishedDate DATE,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+-- 17. Bảng ClubMembers
+CREATE TABLE ClubMembers (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ClubId INT,
+    StudentId INT,
+    Role NVARCHAR(50) DEFAULT 'Member', -- 'Member', 'Leader'
+    JoinedDate DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (ClubId) REFERENCES Clubs(Id),
+    FOREIGN KEY (StudentId) REFERENCES Users(Id)
+);
+
+-- 18. Bảng ClubEvents
+CREATE TABLE ClubEvents (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ClubId INT,
+    Title NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX),
+    EventDate DATETIME,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (ClubId) REFERENCES Clubs(Id)
+);

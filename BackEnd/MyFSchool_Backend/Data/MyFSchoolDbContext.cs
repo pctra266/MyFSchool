@@ -27,6 +27,9 @@ public class MyFSchoolDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<Club> Clubs { get; set; }
+    public DbSet<ClubMember> ClubMembers { get; set; }
+    public DbSet<ClubEvent> ClubEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -145,6 +148,25 @@ public class MyFSchoolDbContext : DbContext
             .HasOne(n => n.User)
             .WithMany(u => u.Notifications)
             .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Club relationships
+        modelBuilder.Entity<ClubMember>()
+            .HasOne(cm => cm.Club)
+            .WithMany(c => c.Members)
+            .HasForeignKey(cm => cm.ClubId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClubMember>()
+            .HasOne(cm => cm.Student)
+            .WithMany(u => u.ClubMembers)
+            .HasForeignKey(cm => cm.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClubEvent>()
+            .HasOne(ce => ce.Club)
+            .WithMany(c => c.Events)
+            .HasForeignKey(ce => ce.ClubId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<AcademicResult>()
