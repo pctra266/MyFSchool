@@ -49,52 +49,15 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
     }
   }
 
-  double _calculateOverallGpa() {
-    if (_allResults.isEmpty) return 0.0;
-    double totalScore = 0;
-    for (var r in _allResults) {
-      final scoreVal = r['score'];
-      totalScore += (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
-    }
-    return totalScore / _allResults.length;
-  }
-
-  List<FlSpot> _getGpaChartSpots() {
-    if (_allResults.isEmpty) return const [FlSpot(0, 0)];
-    
-    final Map<int, List<double>> semesterScores = {};
-    for (var r in _allResults) {
-      final int sem = r['semester'] ?? 1;
-      final scoreVal = r['score'];
-      final double score = (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
-      semesterScores.putIfAbsent(sem, () => []).add(score);
-    }
-    
-    final List<FlSpot> spots = [];
-    final sortedSemesters = semesterScores.keys.toList()..sort();
-    for (int i = 0; i < sortedSemesters.length; i++) {
-      final sem = sortedSemesters[i];
-      final scores = semesterScores[sem]!;
-      final double avg = scores.reduce((a, b) => a + b) / scores.length;
-      spots.add(FlSpot((sem - 1).toDouble(), double.parse(avg.toStringAsFixed(1))));
-    }
-    
-    if (spots.isEmpty) return const [FlSpot(0, 0)];
-    if (spots.length == 1) {
-      spots.add(FlSpot(spots.first.x + 1, spots.first.y));
-    }
-    return spots;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _backgroundColor,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Academic Results'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        title: const Text('Academic Transcript'),
+        backgroundColor: _primaryColor,
+        foregroundColor: _textColor,
         elevation: 0,
         centerTitle: true,
       ),
@@ -102,231 +65,28 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
               ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
-              : SingleChildScrollView(
-                  padding: EdgeInsets.zero,
-        child: Column(
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'GPA Growth',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: _textColor,
-                          fontWeight: FontWeight.bold,
+              : SafeArea(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSemesterSelector(),
+                              const SizedBox(height: 16),
+                              _buildSubjectList(),
+                              const SizedBox(height: 40),
+                            ],
+                          ),
                         ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildGpaChart(),
-                  const SizedBox(height: 32),
-                  _buildSemesterSelector(),
-                  const SizedBox(height: 16),
-                  _buildSubjectList(),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            _primaryColor,
-            _primaryColor.withValues(alpha: 0.8),
-            _primaryColor.withValues(alpha: 0.6),
-          ],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: _primaryColor.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.fromLTRB(24, 100, 24, 32),
-      child: Column(
-        children: [
-          const Text(
-            'Overall GPA',
-            style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 8),
-          _AnimatedCounter(
-            value: _calculateOverallGpa(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 56,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -1,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                const SizedBox(width: 8),
-                const Text(
-                  'Excellent Student',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGpaChart() {
-    return Container(
-      height: 220,
-      padding: const EdgeInsets.fromLTRB(16, 24, 24, 0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: LineChart(
-        LineChartData(
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            horizontalInterval: 1,
-            getDrawingHorizontalLine: (value) {
-              return FlLine(
-                color: Colors.grey.withValues(alpha: 0.1),
-                strokeWidth: 1,
-              );
-            },
-          ),
-          titlesData: FlTitlesData(
-            show: true,
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  const style = TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  );
-                  String text;
-                  switch (value.toInt()) {
-                    case 0:
-                      text = 'Term 1';
-                      break;
-                    case 1:
-                      text = 'Term 2';
-                      break;
-                    case 2:
-                      text = 'Term 3';
-                      break;
-                    case 3:
-                      text = 'Term 4';
-                      break;
-                    default:
-                      return Container();
-                  }
-                  return SideTitleWidget(
-                    meta: meta,
-                    child: Text(text, style: style),
-                  );
-                },
-                interval: 1,
-              ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                interval: 2,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    value.toInt().toString(),
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      ],
                     ),
-                  );
-                },
-                reservedSize: 30,
-              ),
-            ),
-          ),
-          borderData: FlBorderData(show: false),
-          minX: 0,
-          maxX: 3,
-          minY: 0,
-          maxY: 10,
-          lineBarsData: [
-            LineChartBarData(
-              spots: _getGpaChartSpots(),
-              isCurved: true,
-              gradient: const LinearGradient(
-                colors: [_primaryColor, Color(0xFFFFCCBC)],
-              ),
-              barWidth: 4,
-              isStrokeCapRound: true,
-              dotData: FlDotData(
-                show: true,
-                getDotPainter: (spot, percent, barData, index) {
-                  return FlDotCirclePainter(
-                    radius: 6,
-                    color: Colors.white,
-                    strokeWidth: 3,
-                    strokeColor: _primaryColor,
-                  );
-                },
-              ),
-              belowBarData: BarAreaData(
-                show: true,
-                gradient: LinearGradient(
-                  colors: [
-                    _primaryColor.withValues(alpha: 0.3),
-                    _primaryColor.withValues(alpha: 0.0),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -381,7 +141,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
   }
 
   List<Map<String, dynamic>> _getFilteredSubjects() {
-    final semesterResults = _allResults.where((r) => r['semester'] == _selectedSemester).toList();
+    final semesterResults = _allResults.where((r) => r['semester']?.toString() == _selectedSemester.toString()).toList();
     
     final Map<String, Map<String, dynamic>> subjectMap = {};
     for (var r in semesterResults) {
@@ -435,28 +195,6 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen> {
 
     return Column(
       children: subjects.map((sub) => _SubjectCard(data: sub)).toList(),
-    );
-  }
-}
-
-class _AnimatedCounter extends StatelessWidget {
-  final double value;
-  final TextStyle style;
-
-  const _AnimatedCounter({required this.value, required this.style});
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: value),
-      duration: const Duration(seconds: 2),
-      curve: Curves.easeOutExpo,
-      builder: (context, val, child) {
-        return Text(
-          val.toStringAsFixed(1),
-          style: style,
-        );
-      },
     );
   }
 }

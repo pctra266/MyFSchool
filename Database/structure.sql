@@ -1,4 +1,6 @@
-﻿-- 1. Bảng Users (Đã sửa tên cột và thêm các cột thiếu)
+﻿--create database MyFSchool
+-- 1. Bảng Users (Đã sửa tên cột và thêm các cột thiếu)
+
 CREATE TABLE Users (
     Id INT PRIMARY KEY IDENTITY(1,1),
     FullName NVARCHAR(255),

@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
 
     final List<Map<String, dynamic>> menuItems = [
-      {'icon': Icons.assignment_turned_in, 'label': 'Academic results', 'route': '/academic_results'},
+      {'icon': Icons.assignment_turned_in, 'label': 'Academic Transcript', 'route': '/academic_results'},
       {'icon': Icons.calendar_month, 'label': 'Timetable', 'route': '/timetable'},
       {'icon': Icons.verified_user, 'label': 'Attendance', 'route': '/attendance'},
       {'icon': Icons.edit_document, 'label': 'Leave request', 'route': '/leave_request'},
