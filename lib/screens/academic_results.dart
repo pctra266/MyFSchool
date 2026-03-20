@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../services/api_service.dart';
 
 const Color _primaryColor = Color(0xFFBFA18E);
@@ -21,6 +22,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
   bool _isLoading = true;
   String? _errorMessage;
   List<dynamic> _allResults = [];
+  String _selectedChartSubject = 'Tất cả';
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -143,27 +145,34 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
               ? Center(
                   child: Text(_errorMessage!,
                       style: const TextStyle(color: Colors.red)))
-              : SafeArea(
-                  child: Column(
-                    children: [
-                      _buildHeaderBanner(),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              _buildGradeSelector(),
-                              const SizedBox(height: 12),
-                              _buildSemesterSelector(),
-                              const SizedBox(height: 20),
-                              _buildSubjectList(),
-                              const SizedBox(height: 24),
-                            ],
+              : OrientationBuilder(
+                  builder: (context, orientation) {
+                    if (orientation == Orientation.landscape) {
+                      return _buildLandscapeChart();
+                    }
+                    return SafeArea(
+                      child: Column(
+                        children: [
+                          _buildHeaderBanner(),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  _buildGradeSelector(),
+                                  const SizedBox(height: 12),
+                                  _buildSemesterSelector(),
+                                  const SizedBox(height: 20),
+                                  _buildSubjectList(),
+                                  const SizedBox(height: 24),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
     );
   }
@@ -399,6 +408,243 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
       ),
     );
   }
+
+  Widget _buildLandscapeChart() {
+    final filtered = _allResults.where((r) {
+      final grade = (r['gradeLevel'] as num?)?.toInt() ?? 10;
+      final semester = (r['semester'] as num?)?.toInt() ?? 1;
+      return grade == _selectedGrade && semester == _selectedSemester;
+    }).toList();
+
+    if (filtered.isEmpty) {
+      return const Center(child: Text('Không có dữ liệu để hiển thị biểu đồ'));
+    }
+
+    final subjects = filtered
+        .map((e) => e['subjectName']?.toString() ?? 'Unknown')
+        .toSet()
+        .toList();
+    subjects.insert(0, 'Tất cả');
+
+    final chartDataObj = _selectedChartSubject == 'Tất cả'
+        ? filtered
+        : filtered.where((r) => r['subjectName'] == _selectedChartSubject).toList();
+
+    final Map<String, List<double>> assessmentScores = {};
+    for (var r in chartDataObj) {
+      final String assessmentName = r['assessmentName']?.toString() ?? 'Test';
+      final scoreVal = r['score'];
+      final score = (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
+      
+      if (!assessmentScores.containsKey(assessmentName)) {
+        assessmentScores[assessmentName] = [];
+      }
+      assessmentScores[assessmentName]!.add(score);
+    }
+
+    final List<String> xAxisLabels = assessmentScores.keys.toList();
+    
+    final List<FlSpot> spots = [];
+    for (int i = 0; i < xAxisLabels.length; i++) {
+        final scores = assessmentScores[xAxisLabels[i]]!;
+        final avg = scores.reduce((a, b) => a + b) / scores.length;
+        spots.add(FlSpot(i.toDouble(), double.parse(avg.toStringAsFixed(2))));
+    }
+
+    if (spots.isEmpty) {
+      return const Center(child: Text('Không có dữ liệu để hiển thị biểu đồ'));
+    }
+
+    final yearMap = {
+      10: '2023 – 2024',
+      11: '2024 – 2025',
+      12: '2025 – 2026',
+    };
+
+    return SafeArea(
+      child: Container(
+        color: _backgroundColor,
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ],
+          ),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Bảng Điểm Toàn Cảnh',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _textColor),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _primaryColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Lớp $_selectedGrade • HK $_selectedSemester • ${yearMap[_selectedGrade] ?? ""}',
+                          style: const TextStyle(
+                            fontSize: 13, 
+                            fontWeight: FontWeight.w600,
+                            color: _primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _backgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: subjects.contains(_selectedChartSubject) ? _selectedChartSubject : 'Tất cả',
+                        icon: const Icon(Icons.arrow_drop_down, color: _primaryColor),
+                        items: subjects.map((sub) {
+                          return DropdownMenuItem(
+                            value: sub,
+                            child: Text(sub, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedChartSubject = val;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+            Expanded(
+              child: LineChart(
+                LineChartData(
+                  minY: 0,
+                  maxY: 10,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: true,
+                      color: _primaryColor,
+                      barWidth: 4,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                          radius: 4,
+                          color: Colors.white,
+                          strokeWidth: 2,
+                          strokeColor: _primaryColor,
+                        ),
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: _primaryColor.withValues(alpha: 0.15),
+                      ),
+                    ),
+                  ],
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          if (value.toInt() >= 0 && value.toInt() < xAxisLabels.length) {
+                            String label = xAxisLabels[value.toInt()];
+                            if (label.length > 15) {
+                              label = '${label.substring(0, 12)}...';
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[700], fontWeight: FontWeight.w600)),
+                            );
+                          }
+                          return const Text('');
+                        },
+                        reservedSize: 32,
+                        interval: 1,
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 32,
+                        interval: 2,
+                        getTitlesWidget: (value, meta) {
+                          return Text(value.toInt().toString(), style: TextStyle(fontSize: 12, color: Colors.grey[700], fontWeight: FontWeight.bold));
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  gridData: FlGridData(
+                    show: true, 
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.shade200,
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                      left: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                      right: const BorderSide(color: Colors.transparent),
+                      top: const BorderSide(color: Colors.transparent),
+                    ),
+                  ),
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipColor: (touchedSpot) => Colors.blueGrey.shade800,
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((LineBarSpot touchedSpot) {
+                          final textStyle = const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          );
+                          return LineTooltipItem(
+                            '${touchedSpot.y}',
+                            textStyle,
+                          );
+                        }).toList();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 }
 
 class _SubjectCard extends StatelessWidget {
