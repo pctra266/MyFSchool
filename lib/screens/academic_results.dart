@@ -188,7 +188,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [_primaryColor, _primaryColor.withValues(alpha: 0.75)],
+          colors: [_primaryColor, _primaryColor.withOpacity(0.75)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -198,7 +198,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.25),
+              color: Colors.white.withOpacity(0.25),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -214,7 +214,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
           Text(
             'Năm học ${yearMap[_selectedGrade]}',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Colors.white.withOpacity(0.9),
               fontSize: 13,
             ),
           ),
@@ -239,7 +239,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -302,7 +302,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
               style: TextStyle(
                 fontSize: 10,
                 color: isSelected
-                    ? Colors.white.withValues(alpha: 0.85)
+                    ? Colors.white.withOpacity(0.85)
                     : Colors.grey[400],
               ),
             ),
@@ -325,7 +325,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -351,7 +351,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
           padding: const EdgeInsets.symmetric(vertical: 11),
           decoration: BoxDecoration(
             color: isSelected
-                ? _primaryColor.withValues(alpha: 0.15)
+                ? _primaryColor.withOpacity(0.15)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: isSelected
@@ -481,7 +481,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               )
@@ -504,7 +504,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _primaryColor.withValues(alpha: 0.15),
+                          color: _primaryColor.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -571,7 +571,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
                       ),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: _primaryColor.withValues(alpha: 0.15),
+                        color: _primaryColor.withOpacity(0.15),
                       ),
                     ),
                   ],
@@ -702,7 +702,7 @@ class _SubjectCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -716,7 +716,7 @@ class _SubjectCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: scoreColor.withValues(alpha: 0.12),
+              color: scoreColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
