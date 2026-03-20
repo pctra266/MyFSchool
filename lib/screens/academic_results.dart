@@ -410,56 +410,66 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
   }
 
   Widget _buildLandscapeChart() {
-    final filtered = _allResults.where((r) {
-      final grade = (r['gradeLevel'] as num?)?.toInt() ?? 10;
-      final semester = (r['semester'] as num?)?.toInt() ?? 1;
-      return grade == _selectedGrade && semester == _selectedSemester;
-    }).toList();
-
-    if (filtered.isEmpty) {
+    if (_allResults.isEmpty) {
       return const Center(child: Text('Không có dữ liệu để hiển thị biểu đồ'));
     }
 
-    final subjects = filtered
+    final subjects = _allResults
         .map((e) => e['subjectName']?.toString() ?? 'Unknown')
         .toSet()
         .toList();
     subjects.insert(0, 'Tất cả');
 
     final chartDataObj = _selectedChartSubject == 'Tất cả'
-        ? filtered
-        : filtered.where((r) => r['subjectName'] == _selectedChartSubject).toList();
+        ? _allResults
+        : _allResults.where((r) => r['subjectName'] == _selectedChartSubject).toList();
 
-    final Map<String, List<double>> assessmentScores = {};
+    final Map<String, List<double>> semesterScores = {};
     for (var r in chartDataObj) {
-      final String assessmentName = r['assessmentName']?.toString() ?? 'Test';
+      final grade = (r['gradeLevel'] as num?)?.toInt() ?? 10;
+      final semester = (r['semester'] as num?)?.toInt() ?? 1;
+      
+      final String key = '${grade.toString().padLeft(2, '0')}-$semester';
       final scoreVal = r['score'];
       final score = (scoreVal is int) ? scoreVal.toDouble() : (scoreVal as double? ?? 0.0);
       
-      if (!assessmentScores.containsKey(assessmentName)) {
-        assessmentScores[assessmentName] = [];
+      if (!semesterScores.containsKey(key)) {
+        semesterScores[key] = [];
       }
-      assessmentScores[assessmentName]!.add(score);
+      semesterScores[key]!.add(score);
     }
 
-    final List<String> xAxisLabels = assessmentScores.keys.toList();
+    final List<String> sortedKeys = semesterScores.keys.toList()..sort();
     
     final List<FlSpot> spots = [];
-    for (int i = 0; i < xAxisLabels.length; i++) {
-        final scores = assessmentScores[xAxisLabels[i]]!;
+    final List<String> xAxisLabels = [];
+
+    for (int i = 0; i < sortedKeys.length; i++) {
+        final key = sortedKeys[i];
+        final parts = key.split('-');
+        final grade = int.parse(parts[0]);
+        final semester = int.parse(parts[1]);
+        xAxisLabels.add('Lớp $grade\nHK$semester');
+
+        final scores = semesterScores[key]!;
         final avg = scores.reduce((a, b) => a + b) / scores.length;
         spots.add(FlSpot(i.toDouble(), double.parse(avg.toStringAsFixed(2))));
     }
 
     if (spots.isEmpty) {
-      return const Center(child: Text('Không có dữ liệu để hiển thị biểu đồ'));
+      return const Center(child: Text('Không có đủ dữ liệu quá trình học tập'));
     }
 
-    final yearMap = {
-      10: '2023 – 2024',
-      11: '2024 – 2025',
-      12: '2025 – 2026',
-    };
+    String rangeText = 'Tiến độ học tập';
+    if (sortedKeys.length > 1) {
+      final firstGrade = int.parse(sortedKeys.first.split('-')[0]);
+      final lastGrade = int.parse(sortedKeys.last.split('-')[0]);
+      if (firstGrade != lastGrade) {
+        rangeText = 'Tổng quan Lớp $firstGrade - Lớp $lastGrade';
+      } else {
+        rangeText = 'Tổng quan Lớp $firstGrade';
+      }
+    }
 
     return SafeArea(
       child: Container(
@@ -487,7 +497,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Bảng Điểm Toàn Cảnh',
+                        'Bảng Điểm Toàn Khóa',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _textColor),
                       ),
                       const SizedBox(height: 6),
@@ -498,7 +508,7 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'Lớp $_selectedGrade • HK $_selectedSemester • ${yearMap[_selectedGrade] ?? ""}',
+                          rangeText,
                           style: const TextStyle(
                             fontSize: 13, 
                             fontWeight: FontWeight.w600,
@@ -572,17 +582,21 @@ class _AcademicResultsScreenState extends State<AcademicResultsScreen>
                         getTitlesWidget: (value, meta) {
                           if (value.toInt() >= 0 && value.toInt() < xAxisLabels.length) {
                             String label = xAxisLabels[value.toInt()];
-                            if (label.length > 15) {
-                              label = '${label.substring(0, 12)}...';
-                            }
+                            final parts = label.split('\n');
                             return Padding(
-                              padding: const EdgeInsets.only(top: 10.0),
-                              child: Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[700], fontWeight: FontWeight.w600)),
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(parts[0], style: TextStyle(fontSize: 11, color: Colors.grey[800], fontWeight: FontWeight.bold)),
+                                  Text(parts[1], style: TextStyle(fontSize: 10, color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                                ]
+                              ),
                             );
                           }
                           return const Text('');
                         },
-                        reservedSize: 32,
+                        reservedSize: 38,
                         interval: 1,
                       ),
                     ),
