@@ -16,11 +16,14 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _notices = [];
   bool _isLoadingNews = true;
   String? _newsError;
+  Map<String, dynamic>? _profileData;
+  bool _isLoadingProfile = true;
 
   @override
   void initState() {
     super.initState();
     _fetchNews();
+    _fetchUserInfo();
   }
 
   Future<void> _fetchNews() async {
@@ -43,6 +46,28 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _newsError = 'Error connecting to server';
         _isLoadingNews = false;
+      });
+    }
+  }
+
+  Future<void> _fetchUserInfo() async {
+    try {
+      final response = await ApiService().getProfile();
+      if (!mounted) return;
+      if (response['success']) {
+        setState(() {
+          _profileData = response['data'];
+          _isLoadingProfile = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingProfile = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingProfile = false;
       });
     }
   }
@@ -96,10 +121,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     radius: 26,
                     backgroundColor: Colors.white,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'),
+                    backgroundImage: _profileData?['avatarUrl'] != null
+                        ? NetworkImage(_profileData!['avatarUrl'])
+                        : const NetworkImage('https://i.pravatar.cc/150?img=37'),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -107,9 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Alice CrawlingOne',
-                        style: TextStyle(
+                      Text(
+                        _isLoadingProfile ? 'Loading...' : (_profileData?['fullName'] ?? 'Student'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -122,9 +149,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text(
-                          'Class 10A1 • Academic Year 2023-2024',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        child: Text(
+                          _isLoadingProfile 
+                              ? 'Loading...' 
+                              : '${_profileData?['focusArea'] ?? 'N/A'} • Academic Year 2025-2026',
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
                     ],
